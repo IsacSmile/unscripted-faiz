@@ -141,21 +141,21 @@ img {
 
 /* Default / Desktop Header Logo */
 .site-header .site-logo {
-  height: 36px;
+  height: 42px;
 }
 
 /* Footer Brand Logo (quieter and slightly smaller) */
 .footer-brand-link .site-logo {
-  height: 28px;
+  height: 32px;
 }
 
 /* Mobile Header & Drawer Logo sizes */
 @media (max-width: 768px) {
   .site-header .site-logo {
-    height: 30px;
+    height: 34px;
   }
   .mobile-nav-header .site-logo {
-    height: 30px;
+    height: 34px;
   }
 }
 
