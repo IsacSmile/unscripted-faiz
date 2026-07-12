@@ -2,10 +2,29 @@ const Database = require('better-sqlite3');
 const path = require('path');
 const fs = require('fs');
 
-const dbPath = path.join(__dirname, 'database.sqlite');
+// ======================================================
+// Database location
+// Local Development -> db/database.sqlite
+// Railway Production -> /data/database.sqlite
+// ======================================================
+
+const dataDirectory = process.env.DATA_DIR || __dirname;
+
+fs.mkdirSync(dataDirectory, { recursive: true });
+
+const dbPath = path.join(dataDirectory, 'database.sqlite');
+
 const db = new Database(dbPath);
 
-// Create tables
+db.pragma('journal_mode = WAL');
+db.pragma('foreign_keys = ON');
+
+console.log(`SQLite database: ${dbPath}`);
+
+// ======================================================
+// Create Tables
+// ======================================================
+
 db.exec(`
   CREATE TABLE IF NOT EXISTS categories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -23,7 +42,7 @@ db.exec(`
     content TEXT,
     cover_image TEXT,
     video_url TEXT,
-    status TEXT CHECK(status IN ('draft', 'published', 'scheduled')) NOT NULL DEFAULT 'draft',
+    status TEXT CHECK(status IN ('draft','published','scheduled')) NOT NULL DEFAULT 'draft',
     scheduled_for DATETIME,
     featured INTEGER DEFAULT 0,
     written_by TEXT,
@@ -47,41 +66,103 @@ db.exec(`
   );
 `);
 
-// Seed default settings (section headings, Quran verse, ambient music)
+// ======================================================
+// Default Settings
+// ======================================================
+
 const defaultSettings = {
-  heading_featured:   'Featured',
+  heading_featured: 'Featured',
   heading_categories: 'Explore by Category',
-  heading_whispers:   'Whispers from Within',
-  quran_verse:        'And whoever relies upon Allah — then He is sufficient for him.',
-  quran_ref:          '— Quran 65:3',
-  ambient_music_src:  'https://framerusercontent.com/assets/s6Kcvm0lGpVdIimLMjrCJjPgd28.mp3',
+  heading_whispers: 'Whispers from Within',
+  quran_verse:
+    'And whoever relies upon Allah — then He is sufficient for him.',
+  quran_ref: '— Quran 65:3',
+  ambient_music_src:
+    'https://framerusercontent.com/assets/s6Kcvm0lGpVdIimLMjrCJjPgd28.mp3',
   ambient_music_type: 'file'
 };
-const upsertSetting = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
-for (const [k, v] of Object.entries(defaultSettings)) {
-  upsertSetting.run(k, v);
+
+const upsertSetting = db.prepare(
+  'INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)'
+);
+
+for (const [key, value] of Object.entries(defaultSettings)) {
+  upsertSetting.run(key, value);
 }
 
-// Seed data if empty
-const countCategories = db.prepare('SELECT COUNT(*) as count FROM categories').get();
+// ======================================================
+// Seed Categories
+// ======================================================
+
+const countCategories = db
+  .prepare('SELECT COUNT(*) AS count FROM categories')
+  .get();
+
 if (countCategories.count === 0) {
-  const insertCategory = db.prepare('INSERT INTO categories (name, slug, background_image) VALUES (?, ?, ?)');
-  insertCategory.run('Tech', 'tech', 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80');
-  insertCategory.run('World', 'world', 'https://images.unsplash.com/photo-1502951682449-e5b93545d8b5?w=800&q=80');
-  insertCategory.run('College', 'college', 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&q=80');
-  insertCategory.run('Personal', 'personal', 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80');
-  insertCategory.run('Gazal', 'gazal', 'https://images.unsplash.com/photo-1513258496099-481663116df7?w=800&q=80');
+  const insertCategory = db.prepare(
+    'INSERT INTO categories (name, slug, background_image) VALUES (?, ?, ?)'
+  );
+
+  insertCategory.run(
+    'Tech',
+    'tech',
+    'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80'
+  );
+
+  insertCategory.run(
+    'World',
+    'world',
+    'https://images.unsplash.com/photo-1502951682449-e5b93545d8b5?w=800&q=80'
+  );
+
+  insertCategory.run(
+    'College',
+    'college',
+    'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&q=80'
+  );
+
+  insertCategory.run(
+    'Personal',
+    'personal',
+    'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80'
+  );
+
+  insertCategory.run(
+    'Gazal',
+    'gazal',
+    'https://images.unsplash.com/photo-1513258496099-481663116df7?w=800&q=80'
+  );
 }
 
-const countPosts = db.prepare('SELECT COUNT(*) as count FROM posts').get();
+// ======================================================
+// Seed Posts
+// ======================================================
+
+const countPosts = db
+  .prepare('SELECT COUNT(*) AS count FROM posts')
+  .get();
+
 if (countPosts.count === 0) {
   const insertPost = db.prepare(`
-    INSERT INTO posts (title, slug, category, description, content, cover_image, status, featured, written_by, published_at)
+    INSERT INTO posts (
+      title,
+      slug,
+      category,
+      description,
+      content,
+      cover_image,
+      status,
+      featured,
+      written_by,
+      published_at
+    )
     VALUES (?, ?, ?, ?, ?, ?, 'published', ?, 'Faiz', datetime('now'))
   `);
 
   insertPost.run(
-    'The Beauty of Solitude', 'beauty-of-solitude', 'personal',
+    'The Beauty of Solitude',
+    'beauty-of-solitude',
+    'personal',
     'Sometimes, the best company is yourself. A reflection on quiet moments.',
     '<p>In the rush of modern life, we often forget the profound peace that comes from simply being alone with our thoughts...</p>',
     'https://images.unsplash.com/photo-1444491741275-3747c53c99b4?w=800&q=80',
@@ -89,7 +170,9 @@ if (countPosts.count === 0) {
   );
 
   insertPost.run(
-    'Echoes of the Night', 'echoes-of-the-night', 'gazal',
+    'Echoes of the Night',
+    'echoes-of-the-night',
+    'gazal',
     'A soft gazal exploring the depths of the midnight sky and the stars that listen.',
     '<p>The night speaks in whispers,<br>A language only the broken understand.<br>Stars listen to the silence,<br>While the moon holds my hand.</p>',
     'https://images.unsplash.com/photo-1505322022379-7c3353ee6291?w=800&q=80',
@@ -97,15 +180,19 @@ if (countPosts.count === 0) {
   );
 
   insertPost.run(
-    'Navigating the Tech Layoffs', 'navigating-tech-layoffs', 'tech',
+    'Navigating the Tech Layoffs',
+    'navigating-tech-layoffs',
+    'tech',
     'Thoughts on the current state of the tech industry and how to stay resilient.',
     '<p>It has been a tumultuous year for tech. But amidst the chaos, there are always opportunities for those willing to adapt...</p>',
     'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&q=80',
     0
   );
-  
+
   insertPost.run(
-    'Campus Chronicles: Semester 4', 'campus-chronicles-sem-4', 'college',
+    'Campus Chronicles: Semester 4',
+    'campus-chronicles-sem-4',
+    'college',
     'Late night coffees, endless assignments, and the memories being made.',
     '<p>Semester 4 has been nothing short of a rollercoaster. Between the tough algorithms class and the spontaneous midnight road trips...</p>',
     'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&q=80',
@@ -113,9 +200,15 @@ if (countPosts.count === 0) {
   );
 }
 
-// Helper to get a setting value
+// ======================================================
+// Helper
+// ======================================================
+
 db.getSetting = (key) => {
-  const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(key);
+  const row = db
+    .prepare('SELECT value FROM settings WHERE key = ?')
+    .get(key);
+
   return row ? row.value : null;
 };
 
