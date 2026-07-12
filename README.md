@@ -33,4 +33,4 @@ A full-stack personal blog web app built with Node.js, Express, SQLite, and EJS.
 
 ## Admin Access
 - Navigate to `http://localhost:3000/admin`
-- Login with the password you set in `.env` (Default in `.env.example`: `Imamfaiz02@`)
+- Login with the password you set in `.env` (Default in `.env.example`)
