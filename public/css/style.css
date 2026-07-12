@@ -133,21 +133,21 @@ img {
   line-height: 1;
 }
 
-.logo-un {
-  font-weight: 400;
-  color: var(--accent-color);
+.site-logo {
+  height: 38px;
+  width: auto;
+  display: block;
+  transition: filter var(--transition);
 }
 
-.logo-f {
-  font-size: 1.15em;
-  font-weight: 600;
-  color: var(--accent-secondary);
+[data-theme="light"] .site-logo {
+  filter: none;
 }
 
-.logo-aiz {
-  font-weight: 400;
-  color: var(--accent-secondary);
+[data-theme="dark"] .site-logo {
+  filter: invert(1) sepia(1) saturate(0) brightness(2.5);
 }
+
 
 /* Discreet Admin nav link */
 .nav-admin-link {
