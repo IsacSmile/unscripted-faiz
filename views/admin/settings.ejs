@@ -1,0 +1,90 @@
+<!-- Top Bar -->
+<div class="adm-topbar">
+  <a href="/admin/dashboard" class="adm-wordmark">
+    <span class="wm-un">unscripted</span><span class="wm-f">F</span><span class="wm-aiz">aiz</span>
+  </a>
+  <span style="color:var(--adm-border);">|</span>
+  <span style="color:var(--adm-muted); font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;">Settings</span>
+  <div class="adm-topbar-right">
+    <a href="/admin/dashboard" class="adm-btn adm-btn-ghost">← Dashboard</a>
+  </div>
+</div>
+
+<div class="adm-page" style="max-width: 800px; margin: 0 auto; padding: 2rem 1rem;">
+  <form action="/admin/settings" method="POST" enctype="multipart/form-data">
+    
+    <!-- Row 1: Section Headings -->
+    <div style="background:var(--adm-surface); border:1px solid var(--adm-border); border-radius:var(--adm-radius); padding:2rem; margin-bottom:2rem;">
+      <h2 style="font-family:var(--font-heading); font-size:1.20rem; margin-bottom:0.5rem; color:var(--adm-text);">Homepage Section Headings</h2>
+      <p style="color:var(--adm-muted); font-size:0.85rem; margin-bottom:2rem;">Customize home page section headings.</p>
+      
+      <div class="form-group">
+        <label>Featured Section Heading</label>
+        <input type="text" name="heading_featured" class="form-control"
+               value="<%= settings.heading_featured || 'Featured' %>" required>
+      </div>
+      <div class="form-group">
+        <label>Categories Section Heading</label>
+        <input type="text" name="heading_categories" class="form-control"
+               value="<%= settings.heading_categories || 'Explore by Category' %>" required>
+      </div>
+      <div class="form-group">
+        <label>Posts Feed Section Heading</label>
+        <input type="text" name="heading_whispers" class="form-control"
+               value="<%= settings.heading_whispers || 'Whispers from Within' %>" required>
+      </div>
+    </div>
+
+    <!-- Row 2: Quran Verse Settings -->
+    <div style="background:var(--adm-surface); border:1px solid var(--adm-border); border-radius:var(--adm-radius); padding:2rem; margin-bottom:2rem;">
+      <h2 style="font-family:var(--font-heading); font-size:1.20rem; margin-bottom:0.5rem; color:var(--adm-text);">Footer Quran Verse</h2>
+      <p style="color:var(--adm-muted); font-size:0.85rem; margin-bottom:2rem;">Update the Quranic verse displayed at the center of the site-wide footer.</p>
+      
+      <div class="form-group">
+        <label>Quran Verse Text</label>
+        <textarea name="quran_verse" class="form-control" rows="3" required><%= settings.quran_verse || 'And whoever relies upon Allah — then He is sufficient for him.' %></textarea>
+      </div>
+      <div class="form-group">
+        <label>Verse Reference / Citation</label>
+        <input type="text" name="quran_ref" class="form-control"
+               value="<%= settings.quran_ref || '— Quran 65:3' %>" required>
+      </div>
+    </div>
+
+    <!-- Row 3: Hero Ambient Music Settings -->
+    <div style="background:var(--adm-surface); border:1px solid var(--adm-border); border-radius:var(--adm-radius); padding:2rem; margin-bottom:2rem;">
+      <h2 style="font-family:var(--font-heading); font-size:1.20rem; margin-bottom:0.5rem; color:var(--adm-text);">Hero Ambient Music</h2>
+      <p style="color:var(--adm-muted); font-size:0.85rem; margin-bottom:2rem;">Configure the audio source for the ambient music player. Audio plays globally when toggled.</p>
+      
+      <div style="margin-bottom: 1.5rem; padding: 1rem; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--adm-border); border-radius: 4px;">
+        <span style="font-size: 0.85rem; color: var(--adm-muted); display: block; margin-bottom: 0.25rem;">Currently Active Source:</span>
+        <strong style="font-size: 0.9rem; color: var(--accent-color); word-break: break-all;">
+          <%= settings.ambient_music_src || 'https://framerusercontent.com/assets/s6Kcvm0lGpVdIimLMjrCJjPgd28.mp3' %>
+        </strong>
+        <span style="font-size: 0.78rem; color: var(--adm-muted); display: block; margin-top: 0.25rem; font-style: italic;">
+          Type: <%= (settings.ambient_music_type || 'file').toUpperCase() %>
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label>Upload Audio File (MP3, WAV, etc.)</label>
+        <input type="file" name="audio_file" class="form-control" accept="audio/*">
+        <span style="font-size: 0.78rem; color: var(--adm-muted); display: block; margin-top: 0.25rem;">Uploading a file takes precedence over pasting a URL below.</span>
+      </div>
+
+      <div class="form-group">
+        <label>Or Paste YouTube URL / Audio Link</label>
+        <input type="text" name="ambient_music_src_url" class="form-control" placeholder="https://www.youtube.com/watch?v=..."
+               value="<%= (settings.ambient_music_src && !settings.ambient_music_src.startsWith('/uploads/')) ? settings.ambient_music_src : '' %>">
+        <span style="font-size: 0.78rem; color: var(--adm-muted); display: block; margin-top: 0.25rem;">Supports standard MP3 URLs and YouTube links. YouTube tracks will play hidden in the background.</span>
+      </div>
+
+      <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1.5rem;">
+        <input type="checkbox" id="clear_music_chk" name="clear_music" value="true" style="width: auto; cursor: pointer;">
+        <label for="clear_music_chk" style="margin: 0; cursor: pointer; font-weight: normal; color: var(--adm-text);">Reset ambient music to site default MP3 source</label>
+      </div>
+    </div>
+
+    <button type="submit" class="adm-btn adm-btn-primary" style="width: 100%; padding: 0.85rem; font-size: 1rem;">Save All Settings</button>
+  </form>
+</div>

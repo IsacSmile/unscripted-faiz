@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title : 'Admin — unscriptedFaiz' %></title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Quill Rich Text Editor -->
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+  <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+
+  <style>
+    :root {
+      --adm-bg:        #0F172A;
+      --adm-surface:   #1E293B;
+      --adm-surface2:  #273449;
+      --adm-border:    rgba(255,255,255,0.08);
+      --adm-text:      #F1F5F9;
+      --adm-muted:     #94A3B8;
+      --adm-accent:    #C4A882;   /* warm gold — echoes public accent */
+      --adm-green:     #34D399;
+      --adm-amber:     #FBBF24;
+      --adm-gray:      #64748B;
+      --adm-red:       #F87171;
+      --adm-radius:    8px;
+      --adm-transition: 0.2s ease;
+
+      --font-script:  'Cormorant Garamond', serif;
+      --font-heading: 'Fraunces', serif;
+      --font-body:    'Helvetica Neue', Helvetica, Arial, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--adm-bg);
+      color: var(--adm-text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Wordmark ── */
+    .adm-wordmark {
+      font-family: var(--font-script);
+      font-style: italic;
+      font-size: 1.75rem;
+      line-height: 1;
+      text-decoration: none;
+    }
+    .wm-un  { color: var(--adm-accent); font-weight: 400; }
+    .wm-f   { color: #fff; font-weight: 600; font-size: 1.1em; }
+    .wm-aiz { color: #fff; font-weight: 400; }
+
+    /* ── Top‑bar ── */
+    .adm-topbar {
+      background: var(--adm-surface);
+      border-bottom: 1px solid var(--adm-border);
+      height: 64px;
+      display: flex;
+      align-items: center;
+      padding: 0 2rem;
+      gap: 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .adm-topbar-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    /* ── Buttons ── */
+    .adm-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1.1rem;
+      border-radius: 6px;
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all var(--adm-transition);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .adm-btn-primary {
+      background: var(--adm-accent);
+      color: #0F172A;
+      border-color: var(--adm-accent);
+    }
+    .adm-btn-primary:hover { opacity: 0.88; }
+    .adm-btn-ghost {
+      background: transparent;
+      color: var(--adm-muted);
+      border-color: var(--adm-border);
+    }
+    .adm-btn-ghost:hover { color: var(--adm-text); border-color: rgba(255,255,255,0.25); }
+    .adm-btn-danger {
+      background: transparent;
+      color: var(--adm-red);
+      border-color: transparent;
+      padding: 0.5rem 0.75rem;
+    }
+    .adm-btn-danger:hover { background: rgba(248,113,113,0.1); }
+
+    /* ── Page wrapper ── */
+    .adm-page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem;
+    }
+
+    /* ── Table card ── */
+    .adm-table-card {
+      background: var(--adm-surface);
+      border: 1px solid var(--adm-border);
+      border-radius: var(--adm-radius);
+      overflow: hidden;
+    }
+    .adm-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .adm-table thead tr {
+      background: var(--adm-surface2);
+    }
+    .adm-table th {
+      padding: 0.85rem 1.25rem;
+      text-align: left;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--adm-muted);
+      font-weight: 600;
+      border-bottom: 1px solid var(--adm-border);
+    }
+    .adm-table td {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--adm-border);
+      vertical-align: middle;
+      font-size: 0.9rem;
+      color: var(--adm-text);
+    }
+    .adm-table tbody tr:last-child td { border-bottom: none; }
+    .adm-table tbody tr {
+      transition: background var(--adm-transition);
+    }
+    .adm-table tbody tr:hover { background: var(--adm-surface2); }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-block;
+      padding: 0.22em 0.7em;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      text-transform: capitalize;
+    }
+    .badge-published { background: rgba(52,211,153,0.15); color: var(--adm-green); }
+    .badge-draft     { background: rgba(100,116,139,0.2);  color: var(--adm-gray); }
+    .badge-scheduled { background: rgba(251,191,36,0.15);  color: var(--adm-amber); }
+    .badge-tech      { background: rgba(96,165,250,0.15);  color: #93C5FD; }
+    .badge-world     { background: rgba(52,211,153,0.15);  color: #6EE7B7; }
+    .badge-college   { background: rgba(196,168,130,0.15); color: var(--adm-accent); }
+    .badge-personal  { background: rgba(248,113,113,0.15); color: #FCA5A5; }
+    .badge-gazal     { background: rgba(167,139,250,0.15); color: #C4B5FD; }
+    .badge-default   { background: rgba(100,116,139,0.2);  color: var(--adm-muted); }
+    .badge-featured  { background: rgba(196,168,130,0.12); color: var(--adm-accent); font-size: 0.68rem; margin-left: 0.5rem; }
+
+    .post-title-cell { font-weight: 500; color: var(--adm-text); }
+    .date-cell { color: var(--adm-muted); font-size: 0.85rem; }
+    .actions-cell { display: flex; gap: 0.5rem; align-items: center; }
+    .adm-edit-link {
+      color: #93C5FD;
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-decoration: none;
+      padding: 0.35rem 0.75rem;
+      border-radius: 5px;
+      border: 1px solid rgba(147,197,253,0.25);
+      transition: all var(--adm-transition);
+    }
+    .adm-edit-link:hover { background: rgba(147,197,253,0.1); }
+
+    /* ── Form controls ── */
+    .form-group { margin-bottom: 1.5rem; }
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--adm-muted);
+    }
+    .form-control {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--adm-surface2);
+      border: 1px solid var(--adm-border);
+      border-radius: var(--adm-radius);
+      color: var(--adm-text);
+      font-family: var(--font-body);
+      font-size: 0.925rem;
+      transition: border-color var(--adm-transition), box-shadow var(--adm-transition);
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: var(--adm-accent);
+      box-shadow: 0 0 0 3px rgba(196,168,130,0.15);
+    }
+    select.form-control option { background: var(--adm-surface2); }
+    textarea.form-control { resize: vertical; }
+
+    /* ── Quill editor dark ── */
+    .ql-toolbar.ql-snow {
+      background: var(--adm-surface);
+      border: 1px solid var(--adm-border) !important;
+      border-bottom: none !important;
+      border-radius: var(--adm-radius) var(--adm-radius) 0 0;
+      padding: 0.75rem 1rem !important;
+    }
+    .ql-toolbar.ql-snow .ql-stroke { stroke: var(--adm-muted); transition: stroke var(--adm-transition); }
+    .ql-toolbar.ql-snow .ql-fill { fill: var(--adm-muted); transition: fill var(--adm-transition); }
+    .ql-toolbar.ql-snow button:hover .ql-stroke,
+    .ql-toolbar.ql-snow button.ql-active .ql-stroke,
+    .ql-toolbar.ql-snow .ql-picker-label:hover .ql-stroke,
+    .ql-toolbar.ql-snow .ql-picker-label.ql-active .ql-stroke { stroke: var(--adm-accent) !important; }
+    .ql-toolbar.ql-snow button:hover .ql-fill,
+    .ql-toolbar.ql-snow button.ql-active .ql-fill,
+    .ql-toolbar.ql-snow .ql-picker-label:hover .ql-fill,
+    .ql-toolbar.ql-snow .ql-picker-label.ql-active .ql-fill { fill: var(--adm-accent) !important; }
+    
+    .ql-toolbar.ql-snow .ql-picker-label { color: var(--adm-muted); transition: color var(--adm-transition); }
+    .ql-toolbar.ql-snow .ql-picker-label:hover { color: var(--adm-accent); }
+    .ql-toolbar.ql-snow .ql-picker-options {
+      background-color: var(--adm-surface2) !important;
+      border: 1px solid var(--adm-border) !important;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.3) !important;
+      color: var(--adm-text) !important;
+    }
+    .ql-snow .ql-picker.ql-expanded .ql-picker-options .ql-picker-item { color: var(--adm-text); }
+    .ql-snow .ql-picker.ql-expanded .ql-picker-options .ql-picker-item:hover { color: var(--adm-accent); }
+    
+    .ql-container.ql-snow {
+      border: 1px solid var(--adm-border) !important;
+      border-radius: 0 0 var(--adm-radius) var(--adm-radius);
+      background: var(--adm-surface2);
+      font-family: var(--font-body);
+      font-size: 1rem;
+      line-height: 1.7;
+      transition: border-color var(--adm-transition), box-shadow var(--adm-transition);
+    }
+    .ql-container.ql-snow:focus-within {
+      border-color: var(--adm-accent) !important;
+      box-shadow: 0 0 0 3px rgba(196,168,130,0.15);
+    }
+    #editor-container { height: 450px; color: var(--adm-text); }
+    .ql-editor { padding: 1.5rem 1.75rem !important; min-height: 100%; }
+    .ql-editor.ql-blank::before { color: var(--adm-muted); font-style: italic; left: 1.75rem !important; }
+    .ql-editor p, .ql-editor ol, .ql-editor ul, .ql-editor pre, .ql-editor blockquote, .ql-editor h1, .ql-editor h2, .ql-editor h3 {
+      margin-bottom: 1.25rem !important;
+    }
+    .ql-editor a { color: var(--adm-accent); text-decoration: underline; }
+    .ql-editor img { border-radius: 6px; margin: 1rem 0; max-width: 100%; }
+
+    /* ── Editor layout ── */
+    .editor-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 2rem;
+      align-items: start;
+    }
+    .editor-sidebar {
+      background: var(--adm-surface);
+      border: 1px solid var(--adm-border);
+      border-radius: var(--adm-radius);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .sidebar-section {
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--adm-border);
+    }
+    .sidebar-section:first-child { padding-top: 0; border-top: none; }
+
+    .adm-checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: var(--adm-text);
+    }
+    .adm-checkbox-label input[type="checkbox"] {
+      width: 16px; height: 16px; cursor: pointer;
+      accent-color: var(--adm-accent);
+    }
+
+    /* ── Login page ── */
+    .login-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--adm-bg);
+      padding: 2rem;
+    }
+    .login-card {
+      width: 100%;
+      max-width: 400px;
+      background: var(--adm-surface);
+      border: 1px solid var(--adm-border);
+      border-radius: 12px;
+      padding: 3rem 2.5rem;
+      text-align: center;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+    }
+    .login-card .adm-wordmark { font-size: 2.25rem; display: block; margin-bottom: 0.5rem; }
+    .login-subtitle { color: var(--adm-muted); font-style: italic; font-size: 0.9rem; margin-bottom: 2.5rem; }
+    .login-error { background: rgba(248,113,113,0.12); color: var(--adm-red); border-radius: 6px; padding: 0.75rem 1rem; margin-bottom: 1.25rem; font-size: 0.875rem; }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .editor-grid { grid-template-columns: 1fr; }
+      .adm-topbar { padding: 0 1rem; }
+      .adm-topbar-right { gap: 0.4rem; }
+    }
+  </style>
+  <%- style %>
+</head>
+<body>
+  <%- body %>
+  <%- script %>
+</body>
+</html>

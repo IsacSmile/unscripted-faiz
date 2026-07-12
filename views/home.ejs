@@ -1,0 +1,146 @@
+<%
+  function catClass(slug) {
+    const map = {
+      tech:'category-tag-tech', world:'category-tag-world',
+      college:'category-tag-college', personal:'category-tag-personal', gazal:'category-tag-gazal'
+    };
+    return map[slug] || 'category-tag-default';
+  }
+  function fmtDate(d) {
+    return new Date(d).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+  }
+  const calSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`;
+
+  // Use settings if passed (home page), else use defaults
+  const _settings = typeof settings !== 'undefined' ? settings : {};
+  const headingFeatured   = _settings.heading_featured   || 'Featured';
+  const headingCategories = _settings.heading_categories || 'Explore by Category';
+  const headingWhispers   = _settings.heading_whispers   || 'Whispers from Within';
+%>
+
+<!-- HERO SECTION -->
+<section class="hero-section">
+  <div class="container hero-inner-grid">
+    <div class="hero-copy">
+      <span class="hero-subtitle">A personal blog</span>
+      <h1 class="hero-title">Every story<br>deserves to be heard.</h1>
+      <p class="hero-desc">
+        Thoughts on life, tech, college days,<br>
+        and gazals that breathe at midnight.
+      </p>
+      <div class="hero-actions" style="display: flex; align-items: center; gap: 1rem;">
+        <a href="/blog" class="btn btn-primary">Read the Latest</a>
+        <button id="ambient-music-btn" class="ambient-music-toggle" aria-label="Play ambient music" title="Play ambient music">
+          <span class="music-icon-container">
+            <svg class="music-icon play-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+            <svg class="music-icon pause-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;"><rect x="6" y="4" width="4" height="16" rx="1"></rect><rect x="14" y="4" width="4" height="16" rx="1"></rect></svg>
+          </span>
+          <span class="ambient-equalizer" aria-hidden="true">
+            <span class="eq-bar bar-1"></span>
+            <span class="eq-bar bar-2"></span>
+            <span class="eq-bar bar-3"></span>
+          </span>
+        </button>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <img
+        src="https://images.unsplash.com/photo-1457369804613-52c61a468e7d?w=900&q=80"
+        alt="Open book — unscriptedFaiz"
+        class="hero-img"
+        loading="eager"
+        onerror="this.src='https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=900&q=80'"
+      >
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED SECTION -->
+<% if (featuredPosts && featuredPosts.length > 0) { %>
+<section class="featured-section">
+  <div class="container">
+    <h2 class="section-heading"><%= headingFeatured %></h2>
+    <div class="featured-scroll-container">
+      <div class="featured-list">
+        <% featuredPosts.forEach(post => { %>
+          <div class="featured-card">
+            <img
+              src="<%= post.cover_image || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=400&q=80' %>"
+              alt="<%= post.title %>" loading="lazy"
+              onerror="this.src='https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=400&q=80'">
+            <div class="featured-content">
+              <span class="post-card-category <%= catClass(post.category) %>"><%= post.category %></span>
+              <h3><a href="/blog/<%= post.slug %>"><%= post.title %></a></h3>
+              <p class="post-card-desc"><%= post.description %></p>
+              <span class="post-card-date"><%- calSvg %> <%= fmtDate(post.published_at) %></span>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+  </div>
+</section>
+<% } %>
+
+<!-- CATEGORIES SECTION -->
+<section class="categories-section">
+  <div class="container">
+    <h2 class="section-heading"><%= headingCategories %></h2>
+    <div class="category-scroll-container">
+      <div class="category-grid" id="category-grid">
+        <% categories.forEach(cat => { %>
+          <a href="/blog?category=<%= cat.slug %>" class="category-card">
+            <img
+              src="<%= cat.background_image || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=80' %>"
+              alt="<%= cat.name %>" loading="lazy"
+              onerror="this.src='https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=80'">
+            <div class="category-card-info">
+              <h3><%= cat.name %></h3>
+              <span class="cat-post-count"><%= cat.post_count || 0 %> <%= (cat.post_count || 0) === 1 ? 'post' : 'posts' %></span>
+            </div>
+          </a>
+        <% }) %>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHISPERS FROM WITHIN — POSTS FEED -->
+<section class="posts-section">
+  <div class="container">
+    <h2 class="section-heading"><%= headingWhispers %></h2>
+    <div class="post-scroll-container">
+      <div class="post-grid" id="post-grid">
+        <% latestPosts.forEach(post => { %>
+          <article class="post-card">
+            <div class="post-card-img-wrapper">
+              <a href="/blog/<%= post.slug %>">
+                <img
+                  src="<%= post.cover_image || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=80' %>"
+                  alt="<%= post.title %>" class="post-card-img" loading="lazy"
+                  onerror="this.src='https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=80'">
+              </a>
+            </div>
+            <div class="post-card-content">
+              <span class="post-card-category <%= catClass(post.category) %>"><%= post.category %></span>
+              <h3 class="post-card-title"><a href="/blog/<%= post.slug %>"><%= post.title %></a></h3>
+              <p class="post-card-desc"><%= post.description %></p>
+              <div class="post-card-footer">
+                <span class="post-card-date"><%- calSvg %> <%= fmtDate(post.published_at) %></span>
+                <button class="share-btn" data-url="/blog/<%= post.slug %>" data-title="<%= post.title %>" aria-label="Share post">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                </button>
+              </div>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+    </div>
+
+    <% if (latestPosts.length >= 18) { %>
+      <div class="load-more-container">
+        <button id="load-more-btn" class="btn">Load More</button>
+      </div>
+    <% } %>
+  </div>
+</section>

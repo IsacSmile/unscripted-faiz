@@ -1,0 +1,99 @@
+<script>
+  window.APP_CONFIG = {
+    ambientMusicSrc: "<%= settings.ambient_music_src || 'https://framerusercontent.com/assets/s6Kcvm0lGpVdIimLMjrCJjPgd28.mp3' %>",
+    ambientMusicType: "<%= settings.ambient_music_type || 'file' %>"
+  };
+</script>
+
+<header class="site-header" id="site-header">
+  <div class="container header-inner">
+    <a href="/home" class="logo-link">
+      <span class="logo-un">unscripted</span><span class="logo-f">F</span><span class="logo-aiz">aiz</span>
+    </a>
+
+    <!-- Desktop nav -->
+    <nav class="main-nav" id="desktop-nav">
+      <ul>
+        <li><a href="/home" class="<%= path === '/home' ? 'active' : '' %>">Home</a></li>
+        <li><a href="/blog" class="<%= path.startsWith('/blog') ? 'active' : '' %>">Blog</a></li>
+        <li><a href="/admin" class="nav-admin-link">Admin</a></li>
+      </ul>
+      <button id="header-music-btn" class="ambient-music-toggle header-music-toggle" aria-label="Play ambient music" title="Play ambient music">
+        <span class="music-icon-container">
+          <svg class="music-icon play-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+          <svg class="music-icon pause-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;"><rect x="6" y="4" width="4" height="16" rx="1"></rect><rect x="14" y="4" width="4" height="16" rx="1"></rect></svg>
+        </span>
+        <span class="ambient-equalizer" aria-hidden="true">
+          <span class="eq-bar bar-1"></span>
+          <span class="eq-bar bar-2"></span>
+          <span class="eq-bar bar-3"></span>
+        </span>
+      </button>
+      <button id="theme-toggle" aria-label="Toggle dark mode">
+        <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+        <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+      </button>
+    </nav>
+
+    <!-- Hamburger (mobile only) -->
+    <button id="hamburger-btn" class="hamburger-btn" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- Backdrop overlay for mobile drawer -->
+<div id="mobile-nav-backdrop" class="mobile-nav-backdrop"></div>
+
+<!-- Mobile nav drawer -->
+<div id="mobile-nav" class="mobile-nav-drawer" aria-label="Mobile navigation">
+  <div class="mobile-nav-header">
+    <a href="/home" class="logo-link">
+      <span class="logo-un">unscripted</span><span class="logo-f">F</span><span class="logo-aiz">aiz</span>
+    </a>
+    <button id="mobile-nav-close" class="mobile-nav-close-btn" aria-label="Close menu">&times;</button>
+  </div>
+  
+  <nav class="mobile-nav-links">
+    <ul>
+      <li><a href="/home" class="<%= path === '/home' ? 'active' : '' %>">Home</a></li>
+      <li><a href="/blog" class="<%= path.startsWith('/blog') ? 'active' : '' %>">Blog</a></li>
+      
+      <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+        <li class="mobile-nav-section-title">Categories</li>
+        <% categories.forEach(cat => { %>
+          <li>
+            <a href="/blog?category=<%= cat.slug %>" class="mobile-category-link <%= typeof categoryFilter !== 'undefined' && categoryFilter === cat.slug ? 'active' : '' %>">
+              # <%= cat.name %>
+            </a>
+          </li>
+        <% }) %>
+      <% } %>
+      
+      <li class="mobile-nav-section-title">Settings</li>
+      <li>
+        <button id="theme-toggle-mobile" class="theme-toggle-mobile-row" aria-label="Toggle theme">
+          <span class="theme-toggle-icon-wrap">
+            <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+            <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          </span>
+          <span class="theme-toggle-mobile-label">Toggle Theme</span>
+        </button>
+      </li>
+      <li>
+        <button id="music-toggle-mobile" class="theme-toggle-mobile-row music-toggle-mobile-row" aria-label="Toggle ambient music">
+          <span class="theme-toggle-icon-wrap" style="position: relative; display: flex; align-items: center; justify-content: center; width: 30px; height: 30px;">
+            <svg class="music-icon play-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+            <svg class="music-icon pause-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;"><rect x="6" y="4" width="4" height="16" rx="1"></rect><rect x="14" y="4" width="4" height="16" rx="1"></rect></svg>
+          </span>
+          <span class="theme-toggle-mobile-label music-toggle-mobile-label">Play Ambient Music</span>
+        </button>
+      </li>
+      <li>
+        <a href="/admin" class="nav-admin-link" style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem; display: block;">
+          Admin Panel
+        </a>
+      </li>
+    </ul>
+  </nav>
+</div>

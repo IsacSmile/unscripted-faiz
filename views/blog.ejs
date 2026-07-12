@@ -1,0 +1,108 @@
+<%
+  function catClass(slug) {
+    const map = { tech:'category-tag-tech', world:'category-tag-world', college:'category-tag-college', personal:'category-tag-personal', gazal:'category-tag-gazal' };
+    return map[slug] || 'category-tag-default';
+  }
+  function fmtDate(d) { return new Date(d).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' }); }
+%>
+
+<section class="posts-section" style="padding-top:2.5rem;">
+  <div class="container">
+
+    <!-- Page heading -->
+    <div style="text-align:center;margin-bottom:2rem;">
+      <h1 style="font-size:2.5rem;font-family:var(--font-heading);margin-bottom:.5rem;">Blog</h1>
+      <p style="font-style:italic;opacity:.65;font-size:1rem;">Thoughts on life, tech, college, and gazals that breathe at midnight.</p>
+    </div>
+
+    <!-- Info strip -->
+    <div class="blog-info-strip">
+      <div class="blog-info-left">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14,2 14,8 20,8"></polyline></svg>
+        <strong id="info-strip-count"><%= totalCount %></strong>
+        <span id="info-strip-text"><%= totalCount === 1 ? 'post' : 'posts' %></span>
+        <% if (categoryFilter) { %>
+          &nbsp;in <span class="post-card-category <%= catClass(categoryFilter) %>" style="margin-bottom:0;"><%= categories.find(c=>c.slug===categoryFilter)?.name||categoryFilter %></span>
+        <% } else { %>
+          &nbsp;published
+        <% } %>
+        <% if (query) { %>&nbsp;— matching "<%= query %>"<% } %>
+      </div>
+      <% if (categoryFilter || query) { %>
+        <a href="/blog" class="blog-info-clear">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          Clear
+        </a>
+      <% } %>
+    </div>
+
+    <!-- Live search bar (no form submit needed) -->
+    <div class="search-form-premium" style="margin-bottom:2rem;">
+      <div class="search-input-wrap">
+        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="live-search-input" class="search-input-field"
+               placeholder="Search posts… (live results)" value="<%= query || '' %>">
+        <% if (categoryFilter) { %><input type="hidden" id="cat-filter-val" value="<%= categoryFilter %>"><% } %>
+      </div>
+    </div>
+
+    <!-- Category Tab Row -->
+    <div class="category-scroll-container" style="margin-bottom:2.5rem;">
+      <div class="category-grid" id="category-tabs" style="height:auto;gap:0.75rem;">
+        <a href="/blog<%= query ? '?q='+query : '' %>" class="category-tab <%= !categoryFilter ? 'active' : '' %>">All</a>
+        <% categories.forEach(cat => { %>
+          <a href="/blog?category=<%= cat.slug %><%= query ? '&q='+query : '' %>"
+             class="category-tab <%= catClass(cat.slug) %> <%= categoryFilter===cat.slug ? 'active' : '' %>">
+            <%= cat.name %>
+          </a>
+        <% }) %>
+      </div>
+    </div>
+
+    <!-- No results message -->
+    <p id="no-results" hidden style="text-align:center;opacity:.6;font-style:italic;padding:3rem 0;">No posts found matching your search.</p>
+
+    <!-- Post grid -->
+    <div class="post-scroll-container">
+      <div class="post-grid" id="post-grid">
+        <% if (posts.length === 0) { %>
+          <p style="opacity:.6;font-style:italic;">No posts found.</p>
+        <% } else { %>
+          <% posts.forEach(post => { %>
+            <article class="post-card">
+              <div class="post-card-img-wrapper">
+                <a href="/blog/<%= post.slug %>">
+                  <img src="<%= post.cover_image || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=80' %>"
+                       alt="<%= post.title %>" class="post-card-img" loading="lazy"
+                       onerror="this.src='https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=80'">
+                </a>
+              </div>
+              <div class="post-card-content">
+                <span class="post-card-category <%= catClass(post.category) %>"><%= post.category %></span>
+                <h3 class="post-card-title"><a href="/blog/<%= post.slug %>"><%= post.title %></a></h3>
+                <p class="post-card-desc"><%= post.description %></p>
+                <div class="post-card-footer">
+                  <span class="post-card-date">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    <%= fmtDate(post.published_at) %>
+                  </span>
+                  <button class="share-btn" data-url="/blog/<%= post.slug %>" data-title="<%= post.title %>" aria-label="Share">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                  </button>
+                </div>
+              </div>
+            </article>
+          <% }) %>
+        <% } %>
+      </div>
+    </div>
+
+    <% if (posts.length >= 18) { %>
+      <div class="load-more-container">
+        <button id="load-more-btn" class="btn">Load More</button>
+      </div>
+    <% } %>
+  </div>
+</section>
+
+

@@ -1,0 +1,147 @@
+<!-- Top Bar -->
+<div class="adm-topbar">
+  <a href="/admin/dashboard" class="adm-wordmark">
+    <span class="wm-un">unscripted</span><span class="wm-f">F</span><span class="wm-aiz">aiz</span>
+  </a>
+  <span style="color:var(--adm-border); font-size:1.2rem;">|</span>
+  <span style="color:var(--adm-muted); font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;">
+    <%= post.id ? 'Edit Post' : 'New Post' %>
+  </span>
+
+  <div class="adm-topbar-right">
+    <a href="/admin/dashboard" class="adm-btn adm-btn-ghost">← Dashboard</a>
+  </div>
+</div>
+
+<div class="adm-page">
+  <form action="/admin/posts<%= post.id ? '/' + post.id : '' %>" method="POST" enctype="multipart/form-data" id="post-form">
+
+    <div class="editor-grid">
+      <!-- Left: Main content -->
+      <div style="display:flex; flex-direction:column; gap:1.5rem;">
+
+        <div style="background:var(--adm-surface);border:1px solid var(--adm-border);border-radius:var(--adm-radius);padding:1.5rem; display:flex; flex-direction:column; gap:1.25rem;">
+          <div class="form-group" style="margin:0;">
+            <label>Title</label>
+            <input type="text" name="title" class="form-control" value="<%= post.title || '' %>" placeholder="Enter post title…" required>
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label>Short Description (shown on cards &amp; SEO)</label>
+            <textarea name="description" class="form-control" rows="3" placeholder="A brief, evocative summary…" required><%= post.description || '' %></textarea>
+          </div>
+        </div>
+
+        <div>
+          <div class="form-group" style="margin-bottom:0.5rem;">
+            <label>Content</label>
+          </div>
+          <input type="hidden" name="content" id="content-input">
+          <div id="editor-container"><%- post.content || '' %></div>
+        </div>
+
+      </div>
+
+      <!-- Right: Sidebar -->
+      <div class="editor-sidebar">
+
+        <!-- Publish -->
+        <div class="sidebar-section" style="padding-top:0;border-top:none;">
+          <div class="form-group" style="margin-bottom:0.75rem;">
+            <label>Status</label>
+            <select name="status" id="status-select" class="form-control">
+              <option value="draft"     <%= post.status === 'draft'     ? 'selected' : '' %>>Draft</option>
+              <option value="published" <%= post.status === 'published' ? 'selected' : '' %>>Published</option>
+              <option value="scheduled" <%= post.status === 'scheduled' ? 'selected' : '' %>>Scheduled</option>
+            </select>
+          </div>
+
+          <div id="schedule-container" style="display:<%= post.status === 'scheduled' ? 'block' : 'none' %>; margin-bottom:0.75rem;">
+            <div class="form-group" style="margin:0;">
+              <label>Publish At</label>
+              <input type="datetime-local" name="scheduled_for" class="form-control"
+                value="<%= post.scheduled_for ? new Date(post.scheduled_for).toISOString().slice(0,16) : '' %>">
+            </div>
+          </div>
+
+          <label class="adm-checkbox-label">
+            <input type="checkbox" name="featured" <%= post.featured ? 'checked' : '' %>>
+            Mark as Featured
+          </label>
+
+          <button type="submit" class="adm-btn adm-btn-primary" style="width:100%; justify-content:center; margin-top:1.25rem; padding:0.75rem;">
+            Save Post
+          </button>
+        </div>
+
+        <!-- Category -->
+        <div class="sidebar-section">
+          <div class="form-group" style="margin-bottom:0.75rem;">
+            <label>Category</label>
+            <select name="category" class="form-control">
+              <option value="">Select existing…</option>
+              <% categories.forEach(cat => { %>
+                <option value="<%= cat.slug %>" <%= post.category === cat.slug ? 'selected' : '' %>><%= cat.name %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label>Or Add New</label>
+            <input type="text" name="new_category" class="form-control" placeholder="New category name…">
+          </div>
+        </div>
+
+        <!-- Cover image -->
+        <div class="sidebar-section">
+          <div class="form-group" style="margin-bottom:0.75rem;">
+            <label>Cover Image</label>
+            <% if (post.cover_image) { %>
+              <img src="<%= post.cover_image %>" style="width:100%;height:130px;object-fit:cover;border-radius:6px;margin-bottom:0.5rem;">
+              <input type="hidden" name="existing_cover" value="<%= post.cover_image %>">
+            <% } %>
+            <input type="file" name="cover_image_file" class="form-control" accept="image/*">
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label>Video URL (embed)</label>
+            <input type="url" name="video_url" class="form-control" value="<%= post.video_url || '' %>" placeholder="https://www.youtube.com/embed/…">
+          </div>
+        </div>
+
+        <!-- Meta -->
+        <div class="sidebar-section">
+          <div class="form-group" style="margin:0;">
+            <label>Written By</label>
+            <input type="text" name="written_by" class="form-control" value="<%= post.written_by || 'Faiz' %>">
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </form>
+</div>
+
+<script>
+  var quill = new Quill('#editor-container', {
+    theme: 'snow',
+    placeholder: 'Write something beautiful…',
+    modules: {
+      toolbar: [
+        [{ header: [2, 3, false] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        ['blockquote', 'code-block'],
+        [{ list: 'ordered' }, { list: 'bullet' }],
+        ['link', 'image'],
+        ['clean']
+      ]
+    }
+  });
+
+  document.getElementById('post-form').onsubmit = function() {
+    document.getElementById('content-input').value = quill.root.innerHTML;
+  };
+
+  document.getElementById('status-select').addEventListener('change', function() {
+    document.getElementById('schedule-container').style.display =
+      this.value === 'scheduled' ? 'block' : 'none';
+  });
+</script>

@@ -1,0 +1,111 @@
+<%
+  function catBadge(slug) {
+    const map = {
+      tech:'badge-tech', world:'badge-world', college:'badge-college',
+      personal:'badge-personal', gazal:'badge-gazal'
+    };
+    return map[slug] || 'badge-default';
+  }
+  function fmtDate(d) {
+    if (!d) return '—';
+    return new Date(d).toLocaleDateString('en-US', {year:'numeric', month:'short', day:'numeric'});
+  }
+%>
+
+<!-- Top Bar -->
+<div class="adm-topbar">
+  <a href="/admin/dashboard" class="adm-wordmark">
+    <span class="wm-un">unscripted</span><span class="wm-f">F</span><span class="wm-aiz">aiz</span>
+  </a>
+  <span style="color:var(--adm-border); font-size:1.2rem;">|</span>
+  <span style="color:var(--adm-muted); font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;">Dashboard</span>
+
+  <div class="adm-topbar-right">
+    <a href="/admin/new" class="adm-btn adm-btn-primary">+ New Post</a>
+    <a href="/admin/categories" class="adm-btn adm-btn-ghost">Categories</a>
+    <a href="/admin/settings" class="adm-btn adm-btn-ghost">Settings</a>
+    <a href="/home" class="adm-btn adm-btn-ghost" target="_blank">View Site ↗</a>
+    <a href="/admin/logout" class="adm-btn adm-btn-ghost">Logout</a>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="adm-page">
+  <!-- Stats row -->
+  <div style="display:flex; gap:1rem; margin-bottom:2rem; flex-wrap:wrap;">
+    <%
+      const published = posts.filter(p => p.status === 'published').length;
+      const drafts    = posts.filter(p => p.status === 'draft').length;
+      const scheduled = posts.filter(p => p.status === 'scheduled').length;
+    %>
+    <div style="background:var(--adm-surface);border:1px solid var(--adm-border);border-radius:8px;padding:1rem 1.5rem;flex:1;min-width:120px;">
+      <div style="font-size:1.75rem;font-weight:700;color:#fff;font-family:var(--font-heading);"><%= posts.length %></div>
+      <div style="font-size:0.78rem;color:var(--adm-muted);text-transform:uppercase;letter-spacing:1px;">Total Posts</div>
+    </div>
+    <div style="background:var(--adm-surface);border:1px solid var(--adm-border);border-radius:8px;padding:1rem 1.5rem;flex:1;min-width:120px;">
+      <div style="font-size:1.75rem;font-weight:700;color:var(--adm-green);font-family:var(--font-heading);"><%= published %></div>
+      <div style="font-size:0.78rem;color:var(--adm-muted);text-transform:uppercase;letter-spacing:1px;">Published</div>
+    </div>
+    <div style="background:var(--adm-surface);border:1px solid var(--adm-border);border-radius:8px;padding:1rem 1.5rem;flex:1;min-width:120px;">
+      <div style="font-size:1.75rem;font-weight:700;color:var(--adm-gray);font-family:var(--font-heading);"><%= drafts %></div>
+      <div style="font-size:0.78rem;color:var(--adm-muted);text-transform:uppercase;letter-spacing:1px;">Drafts</div>
+    </div>
+    <div style="background:var(--adm-surface);border:1px solid var(--adm-border);border-radius:8px;padding:1rem 1.5rem;flex:1;min-width:120px;">
+      <div style="font-size:1.75rem;font-weight:700;color:var(--adm-amber);font-family:var(--font-heading);"><%= scheduled %></div>
+      <div style="font-size:0.78rem;color:var(--adm-muted);text-transform:uppercase;letter-spacing:1px;">Scheduled</div>
+    </div>
+  </div>
+
+  <div class="adm-table-card">
+    <% if (posts.length === 0) { %>
+      <div style="text-align:center; padding:4rem; color:var(--adm-muted); font-style:italic;">
+        No posts yet. Hit "+ New Post" to get started.
+      </div>
+    <% } else { %>
+      <table class="adm-table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% posts.forEach(post => { %>
+            <tr>
+              <td class="post-title-cell">
+                <%= post.title %>
+                <% if (post.featured) { %><span class="badge badge-featured">★ featured</span><% } %>
+              </td>
+              <td>
+                <span class="badge <%= catBadge(post.category) %>"><%= post.category %></span>
+              </td>
+              <td>
+                <span class="badge badge-<%= post.status %>"><%= post.status %></span>
+              </td>
+              <td class="date-cell">
+                <% if (post.status === 'scheduled' && post.scheduled_for) { %>
+                  <%= fmtDate(post.scheduled_for) %>
+                <% } else if (post.status === 'published' && post.published_at) { %>
+                  <%= fmtDate(post.published_at) %>
+                <% } else { %>
+                  <%= fmtDate(post.updated_at) %>
+                <% } %>
+              </td>
+              <td>
+                <div class="actions-cell">
+                  <a href="/admin/posts/<%= post.id %>/edit" class="adm-edit-link">Edit</a>
+                  <form action="/admin/posts/<%= post.id %>/delete" method="POST" style="display:inline;" onsubmit="return confirm('Delete this post permanently?');">
+                    <button type="submit" class="adm-btn adm-btn-danger">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+</div>

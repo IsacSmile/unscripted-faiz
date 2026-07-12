@@ -1,0 +1,81 @@
+<%
+  function catClass(slug) {
+    const map = {
+      tech:'category-tag-tech', world:'category-tag-world',
+      college:'category-tag-college', personal:'category-tag-personal', gazal:'category-tag-gazal'
+    };
+    return map[slug] || 'category-tag-default';
+  }
+  function fmtDate(d) {
+    return new Date(d).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+  }
+%>
+
+<!-- NO sticky bar — removed entirely per bug fix -->
+
+<article class="single-post-container">
+  <div id="post-hero" class="single-post-hero">
+    <span class="post-card-category <%= catClass(post.category) %>" style="margin-bottom:1rem;"><%= post.category %></span>
+    <h1 class="single-post-title"><%= post.title %></h1>
+    <div class="single-post-meta">
+      <span class="meta-piece">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        By <%= post.written_by %>
+      </span>
+      <span class="meta-sep">·</span>
+      <span class="meta-piece">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        <%= format(new Date(post.published_at), 'MMM d, yyyy') %>
+      </span>
+      <span class="meta-sep">·</span>
+      <button class="share-btn share-btn-inline" id="post-share-btn"
+              data-url="/blog/<%= post.slug %>" data-title="<%= post.title %>" aria-label="Share">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+        Share
+      </button>
+    </div>
+  </div>
+
+  <% if (post.cover_image) { %>
+    <img src="<%= post.cover_image %>" alt="<%= post.title %>" class="single-post-cover"
+         onerror="this.style.display='none'">
+  <% } %>
+
+  <% if (post.video_url) { %>
+    <div class="video-container" style="margin-bottom:2.5rem;">
+      <iframe width="100%" height="420" src="<%= post.video_url %>" frameborder="0" allowfullscreen
+              style="border-radius:var(--radius-md);border:1px solid var(--border-color);"></iframe>
+    </div>
+  <% } %>
+
+  <div class="single-post-content">
+    <%- post.content %>
+  </div>
+</article>
+
+<!-- COMMENTS SECTION -->
+<div class="comments-section">
+  <h3>Let Your Heart Speak</h3>
+
+  <form action="/blog/<%= post.slug %>/comment" method="POST" class="comment-form">
+    <input type="text" name="name" placeholder="Whisper your name…" required>
+    <textarea name="comment" placeholder="Let your thoughts flow like verse…" required></textarea>
+    <button type="submit" class="btn btn-primary">Share Your Verse</button>
+  </form>
+
+  <% if (comments && comments.length > 0) { %>
+    <div class="comment-list">
+      <% comments.forEach(comment => { %>
+        <div class="comment-item">
+          <div class="comment-meta">
+            <span class="comment-author"><%= comment.name %></span>
+            <span class="comment-date"><%= format(new Date(comment.created_at), 'MMM d, yyyy') %></span>
+          </div>
+          <div class="comment-body"><%= comment.comment %></div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+
+
