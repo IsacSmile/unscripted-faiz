@@ -143,7 +143,7 @@ cron.schedule('* * * * *', () => {
 
 // 404 handler
 app.use((req, res) => {
-  res.status(404).render('404', { title: 'Page Not Found - UnscriptedFaiz' });
+  res.status(404).render('404', { title: 'Page Not Found - UnfilteredFaiz' });
 });
 
 app.listen(PORT, '0.0.0.0', () => {

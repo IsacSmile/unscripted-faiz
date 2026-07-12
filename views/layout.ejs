@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= typeof title !== 'undefined' ? title : 'UnscriptedFaiz' %></title>
+  <title><%= typeof title !== 'undefined' ? title : 'UnfilteredFaiz' %></title>
   <meta name="description" content="<%= typeof description !== 'undefined' ? description : 'Whispers from Within — a personal blog by Faiz' %>">
 
   <!-- SEO & Open Graph -->
-  <meta property="og:title" content="<%= typeof title !== 'undefined' ? title : 'UnscriptedFaiz' %>">
+  <meta property="og:title" content="<%= typeof title !== 'undefined' ? title : 'UnfilteredFaiz' %>">
   <meta property="og:description" content="<%= typeof description !== 'undefined' ? description : 'Whispers from Within' %>">
   <% if (typeof post !== 'undefined' && post && post.cover_image) { %>
     <meta property="og:image" content="<%= post.cover_image %>">

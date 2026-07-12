@@ -29,7 +29,7 @@ router.get('/home', (req, res) => {
   }));
 
   res.render('home', {
-    title: 'UnscriptedFaiz — Whispers from Within',
+    title: 'UnfilteredFaiz — Whispers from Within',
     featuredPosts,
     categories,
     latestPosts
@@ -76,7 +76,7 @@ router.get('/blog', (req, res) => {
   const totalCount = db.prepare(countSql).get(...countParams).count;
 
   res.render('blog', {
-    title: 'Blog - UnscriptedFaiz',
+    title: 'Blog - UnfilteredFaiz',
     posts,
     categories,
     query,
@@ -90,13 +90,13 @@ router.get('/blog/:slug', (req, res) => {
   const post = db.prepare("SELECT * FROM posts WHERE slug = ? AND status = 'published'").get(req.params.slug);
   
   if (!post) {
-    return res.status(404).render('404', { title: 'Post Not Found - UnscriptedFaiz' });
+    return res.status(404).render('404', { title: 'Post Not Found - UnfilteredFaiz' });
   }
   
   const comments = db.prepare("SELECT * FROM comments WHERE post_id = ? ORDER BY created_at DESC").all(post.id);
   
   res.render('post', {
-    title: `${post.title} - UnscriptedFaiz`,
+    title: `${post.title} - UnfilteredFaiz`,
     post,
     comments,
     format
@@ -123,7 +123,7 @@ router.get('/rss.xml', (req, res) => {
   let rss = `<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0">
 <channel>
-  <title>UnscriptedFaiz</title>
+  <title>UnfilteredFaiz</title>
   <description>Whispers from Within</description>
   <link>http://${req.headers.host}</link>
   <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
