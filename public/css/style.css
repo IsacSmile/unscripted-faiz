@@ -134,10 +134,29 @@ img {
 }
 
 .site-logo {
-  height: 38px;
   width: auto;
   display: block;
-  transition: filter var(--transition);
+  transition: filter var(--transition), height 0.2s ease;
+}
+
+/* Default / Desktop Header Logo */
+.site-header .site-logo {
+  height: 36px;
+}
+
+/* Footer Brand Logo (quieter and slightly smaller) */
+.footer-brand-link .site-logo {
+  height: 28px;
+}
+
+/* Mobile Header & Drawer Logo sizes */
+@media (max-width: 768px) {
+  .site-header .site-logo {
+    height: 30px;
+  }
+  .mobile-nav-header .site-logo {
+    height: 30px;
+  }
 }
 
 [data-theme="light"] .site-logo {
