@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title><%= typeof title !== 'undefined' ? title : 'Admin — unfilteredFaiz' %></title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -35,6 +35,25 @@
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      touch-action: pan-x pan-y; /* Allows scrolling but blocks pinch-to-zoom */
+    }
+
+    select {
+      /* Removes default browser styling */
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      
+      /* Removes tap highlight on mobile devices */
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Optional: Removes the default dotted outline on focus */
+    select:focus {
+      outline: none;
+    }
 
     body {
       font-family: var(--font-body);

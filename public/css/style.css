@@ -57,6 +57,25 @@
   padding: 0;
 }
 
+html, body {
+  touch-action: pan-x pan-y; /* Allows scrolling but blocks pinch-to-zoom */
+}
+
+select {
+  /* Removes default browser styling */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  
+  /* Removes tap highlight on mobile devices */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Optional: Removes the default dotted outline on focus */
+select:focus {
+  outline: none;
+}
+
 body {
   font-family: var(--font-body);
   background-color: var(--bg-color);
@@ -82,6 +101,12 @@ h6 {
   font-weight: 500;
   color: var(--text-color);
   line-height: 1.25;
+}
+
+.blog-page-heading {
+  font-size: 2.5rem;
+  font-family: var(--font-heading);
+  margin-bottom: 0.5rem;
 }
 
 a {
@@ -1648,7 +1673,8 @@ body.mobile-menu-open {
   }
 
   .hero-title {
-    font-size: 2.1rem;
+    font-size: 1.85rem;
+    line-height: 1.2;
     margin-bottom: 0.75rem;
   }
 
@@ -1656,6 +1682,27 @@ body.mobile-menu-open {
     font-size: 0.95rem;
     line-height: 1.6;
     margin-bottom: 1.25rem;
+  }
+
+  .section-heading {
+    font-size: 1.45rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .blog-page-heading {
+    font-size: 1.95rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .post-card-title {
+    font-size: 1.18rem;
+    line-height: 1.35;
+    margin-bottom: 0.5rem;
+  }
+
+  .category-card h3 {
+    font-size: 1.15rem;
   }
 
   .footer-row {
@@ -1673,7 +1720,9 @@ body.mobile-menu-open {
   }
 
   .single-post-title {
-    font-size: 2.2rem;
+    font-size: 1.85rem;
+    line-height: 1.25;
+    margin-bottom: 0.75rem;
   }
 }
 
