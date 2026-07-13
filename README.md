@@ -75,3 +75,5 @@ To access the administrative panel:
 The application is prepared for seamless production deployment (e.g. on Railway, Render, Heroku) with support for SQLite database persistence:
 - Set the `NODE_ENV` environment variable to `production`.
 - Mount a persistent directory at `/data` and specify `DATA_DIR=/data` in your deployment environment variables to preserve the database file and uploaded files across container rebuilds.
+
+Last but not least - Resilience Over Silence
