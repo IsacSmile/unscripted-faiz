@@ -545,7 +545,8 @@ router.post(
       'heading_categories',
       'heading_whispers',
       'quran_verse',
-      'quran_ref'
+      'quran_ref',
+      'hero_desc'
     ];
 
     const upsert = db.prepare(`

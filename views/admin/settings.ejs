@@ -33,6 +33,10 @@
         <input type="text" name="heading_whispers" class="form-control"
                value="<%= settings.heading_whispers || 'Whispers from Within' %>" required>
       </div>
+      <div class="form-group">
+        <label>Hero Sub-Description Text (Supports HTML & newlines)</label>
+        <textarea name="hero_desc" class="form-control" rows="3" required><%= settings.hero_desc !== undefined ? settings.hero_desc : 'Thoughts on life, tech, college days,\nand gazals that breathe at midnight.' %></textarea>
+      </div>
     </div>
 
     <!-- Row 2: Quran Verse Settings -->

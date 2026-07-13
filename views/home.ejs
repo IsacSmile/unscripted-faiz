@@ -22,8 +22,7 @@
         <span class="hero-subtitle">A personal blog</span>
         <h1 class="hero-title">Every story<br>deserves to be heard.</h1>
         <p class="hero-desc">
-          Thoughts on life, tech, college days,<br>
-          and gazals that breathe at midnight.
+          <%- (_settings.hero_desc || 'Thoughts on life, tech, college days,<br>and gazals that breathe at midnight.').replace(/\r?\n/g, '<br>') %>
         </p>
         <div class="hero-actions">
           <a href="/blog" class="btn btn-primary">Read the Latest</a>
