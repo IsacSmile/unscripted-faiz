@@ -7,7 +7,6 @@ const fs = require('fs');
 const cron = require('node-cron');
 const expressLayouts = require('express-ejs-layouts');
 const db = require('./db/database');
-const { runDigestPipeline } = require('./services/newsDigest');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -141,16 +140,6 @@ cron.schedule('* * * * *', () => {
     console.log(`Published ${result.changes} scheduled post(s) at ${now}`);
   }
 });
-
-// Cron Job for Automated Palestine News Digest (Runs hourly)
-cron.schedule('0 * * * *', () => {
-  runDigestPipeline().catch(err => console.error('[Cron NewsDigest Error]:', err));
-});
-
-// Run digest pipeline once on startup
-setTimeout(() => {
-  runDigestPipeline().catch(err => console.error('[Startup NewsDigest Error]:', err));
-}, 5000);
 
 // 404 handler
 app.use((req, res) => {

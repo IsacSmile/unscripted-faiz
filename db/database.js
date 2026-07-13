@@ -73,22 +73,7 @@ try {
   // Column already exists
 }
 
-try {
-  db.exec('ALTER TABLE posts ADD COLUMN is_automated INTEGER DEFAULT 0;');
-} catch (e) {
-  // Column already exists
-}
-
-db.exec(`
-  CREATE TABLE IF NOT EXISTS processed_news_sources (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    url TEXT UNIQUE NOT NULL,
-    title TEXT,
-    processed_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  );
-`);
-
-// ======================================================
+// ==================================================================
 // Default Settings
 // ======================================================
 
