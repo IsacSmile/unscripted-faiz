@@ -432,6 +432,12 @@ img {
   font-style: italic;
 }
 
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 .hero-actions .btn-primary {
   background-color: var(--accent-color);
   color: #fff;
@@ -899,6 +905,8 @@ img {
 .single-post-container {
   max-width: 760px;
   margin: 4rem auto;
+  padding: 0 1.5rem;
+  box-sizing: border-box;
 }
 
 .single-post-hero {
@@ -923,12 +931,20 @@ img {
 
 .single-post-cover {
   width: 100%;
-  max-height: 480px;
+  max-width: 680px;
+  height: 400px;
   object-fit: cover;
   border-radius: var(--radius-lg);
-  margin-bottom: 3rem;
+  margin: 0 auto 3rem;
+  display: block;
   border: 1px solid var(--border-color);
   box-shadow: 0 10px 25px rgba(18, 22, 42, 0.03);
+}
+
+@media (max-width: 768px) {
+  .single-post-cover {
+    height: 240px;
+  }
 }
 
 .single-post-content {
@@ -1583,6 +1599,10 @@ body.mobile-menu-open {
     justify-content: center;
   }
 
+  .hero-actions {
+    justify-content: center;
+  }
+
   .hero-img {
     height: 220px;
   }
@@ -1603,6 +1623,11 @@ body.mobile-menu-open {
 
   .hamburger-btn {
     display: flex;
+  }
+
+  .comments-section {
+    margin: 3rem 1.25rem 2rem;
+    padding: 2rem 1.25rem;
   }
 
   /* Hero Section Mobile Sizing & Spacing */
