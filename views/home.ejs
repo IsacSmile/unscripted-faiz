@@ -88,10 +88,21 @@ const eyeSvg=`<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
                   <p class="post-card-desc">
                     <%= post.description %>
                   </p>
-                  <span class="post-card-date" style="display:inline-flex; align-items:center; gap:0.25rem;"><%- calSvg %>
-                      <%= fmtDate(post.published_at) %></span>
-                  <span class="post-card-date" style="display:inline-flex; align-items:center; gap:0.25rem; margin-left:0.5rem;"><%- eyeSvg %>
-                      <%= post.view_count || 0 %></span>
+                  <div class="post-card-footer" style="padding-top:0.75rem; margin-top:auto; width:100%;">
+                    <div style="display:flex; align-items:center; gap:0.75rem;">
+                      <span class="post-card-date" style="display:inline-flex; align-items:center; gap:0.25rem;"><%- calSvg %> <%= fmtDate(post.published_at) %></span>
+                      <span class="post-card-date" style="display:inline-flex; align-items:center; gap:0.25rem;"><%- eyeSvg %> <%= post.view_count || 0 %></span>
+                    </div>
+                    <button class="share-btn" data-url="/blog/<%= post.slug %>" data-title="<%= post.title %>" aria-label="Share post">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="18" cy="5" r="3"></circle>
+                        <circle cx="6" cy="12" r="3"></circle>
+                        <circle cx="18" cy="19" r="3"></circle>
+                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
               <% }) %>
@@ -160,10 +171,10 @@ const eyeSvg=`<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
                       <%= post.description %>
                     </p>
                     <div class="post-card-footer">
-                      <span class="post-card-date" style="display:inline-flex; align-items:center; gap:0.25rem;"><%- calSvg %>
-                          <%= fmtDate(post.published_at) %></span>
-                      <span class="post-card-date" style="display:inline-flex; align-items:center; gap:0.25rem; margin-left:0.5rem;"><%- eyeSvg %>
-                          <%= post.view_count || 0 %></span>
+                      <div style="display:flex; align-items:center; gap:0.75rem;">
+                        <span class="post-card-date" style="display:inline-flex; align-items:center; gap:0.25rem;"><%- calSvg %> <%= fmtDate(post.published_at) %></span>
+                        <span class="post-card-date" style="display:inline-flex; align-items:center; gap:0.25rem;"><%- eyeSvg %> <%= post.view_count || 0 %></span>
+                      </div>
                       <button class="share-btn" data-url="/blog/<%= post.slug %>" data-title="<%= post.title %>"
                         aria-label="Share post">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
