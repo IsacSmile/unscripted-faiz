@@ -535,7 +535,10 @@ router.get('/settings', (req, res) => {
 
 router.post(
   '/settings',
-  upload.single('audio_file'),
+  upload.fields([
+    { name: 'audio_file', maxCount: 1 },
+    { name: 'hero_image_file', maxCount: 1 }
+  ]),
   (req, res) => {
     const allowedSettings = [
       'heading_featured',
@@ -559,31 +562,33 @@ router.post(
       }
     });
 
+    // Handle audio file
     if (req.body.clear_music === 'true') {
       upsert.run(
         'ambient_music_src',
         'https://framerusercontent.com/assets/s6Kcvm0lGpVdIimLMjrCJjPgd28.mp3'
       );
-
       upsert.run('ambient_music_type', 'file');
-    } else if (req.file) {
-      const filePath = `/uploads/${req.file.filename}`;
-
+    } else if (req.files && req.files.audio_file && req.files.audio_file[0]) {
+      const filePath = `/uploads/${req.files.audio_file[0].filename}`;
       upsert.run('ambient_music_src', filePath);
       upsert.run('ambient_music_type', 'file');
     } else if (req.body.ambient_music_src_url) {
       const url = req.body.ambient_music_src_url.trim();
-
       upsert.run('ambient_music_src', url);
-
-      if (
-        url.includes('youtube.com') ||
-        url.includes('youtu.be')
-      ) {
+      if (url.includes('youtube.com') || url.includes('youtu.be')) {
         upsert.run('ambient_music_type', 'youtube');
       } else {
         upsert.run('ambient_music_type', 'file');
       }
+    }
+
+    // Handle hero image file
+    if (req.body.clear_hero_image === 'true') {
+      upsert.run('hero_image', '');
+    } else if (req.files && req.files.hero_image_file && req.files.hero_image_file[0]) {
+      const filePath = `/uploads/${req.files.hero_image_file[0].filename}`;
+      upsert.run('hero_image', filePath);
     }
 
     res.redirect('/admin/settings');
