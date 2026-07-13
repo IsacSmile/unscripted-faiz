@@ -19,10 +19,11 @@
   <section class="hero-section">
     <div class="container hero-inner-grid">
       <div class="hero-copy">
-        <span class="hero-subtitle">A personal blog</span>
+        <span class="hero-subtitle">Notes from a restless mind.</span>
         <h1 class="hero-title">Every story<br>deserves to be heard.</h1>
         <p class="hero-desc">
-          <%- (_settings.hero_desc || 'Thoughts on life, tech, college days,<br>and gazals that breathe at midnight.').replace(/\r?\n/g, '<br>') %>
+          <%- (_settings.hero_desc || 'Thoughts on life, tech, college days,<br>and gazals that breathe at midnight.'
+            ).replace(/\r?\n/g, '<br>' ) %>
         </p>
         <div class="hero-actions">
           <a href="/blog" class="btn btn-primary">Read the Latest</a>
@@ -50,7 +51,8 @@
         </div>
       </div>
       <div class="hero-visual">
-        <img src="<%= _settings.hero_image || 'https://plus.unsplash.com/premium_photo-1675369532333-a32de6c1e55e?w=900&q=80' %>"
+        <img
+          src="<%= _settings.hero_image || 'https://plus.unsplash.com/premium_photo-1675369532333-a32de6c1e55e?w=900&q=80' %>"
           alt="Open book — unfilteredFaiz" class="hero-img" loading="eager"
           onerror="this.src='https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=900&q=80'">
       </div>
