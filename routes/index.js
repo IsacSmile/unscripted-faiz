@@ -93,6 +93,16 @@ router.get('/blog/:slug', (req, res) => {
     return res.status(404).render('404', { title: 'Post Not Found - UnfilteredFaiz' });
   }
   
+  // Track view counts with session de-duplication
+  if (!req.session.viewed_posts) {
+    req.session.viewed_posts = [];
+  }
+  if (!req.session.viewed_posts.includes(post.id)) {
+    db.prepare("UPDATE posts SET view_count = view_count + 1 WHERE id = ?").run(post.id);
+    req.session.viewed_posts.push(post.id);
+    post.view_count += 1;
+  }
+  
   const comments = db.prepare("SELECT * FROM comments WHERE post_id = ? ORDER BY created_at DESC").all(post.id);
   
   res.render('post', {

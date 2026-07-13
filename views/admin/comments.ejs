@@ -1,0 +1,109 @@
+<!-- Top Bar -->
+<div class="adm-topbar">
+  <a href="/admin/dashboard" class="adm-wordmark">
+    unfiltereFaiz
+  </a>
+  <span style="color:var(--adm-border);">|</span>
+  <span style="color:var(--adm-muted); font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;">Comments</span>
+  <div class="adm-topbar-right">
+    <a href="/admin/dashboard" class="adm-btn adm-btn-ghost">← Dashboard</a>
+  </div>
+</div>
+
+<div class="adm-page" style="max-width: 900px; margin: 0 auto; padding: 2rem 1rem;">
+  
+  <%
+    // Group comments by post
+    const grouped = {};
+    comments.forEach(c => {
+      if (!grouped[c.post_id]) {
+        grouped[c.post_id] = {
+          id: c.post_id,
+          title: c.post_title,
+          slug: c.post_slug,
+          comments: []
+        };
+      }
+      grouped[c.post_id].comments.push(c);
+    });
+    const groupedList = Object.values(grouped);
+  %>
+
+  <% if (comments.length > 0) { %>
+    <!-- Filter Bar -->
+    <div style="background:var(--adm-surface); border:1px solid var(--adm-border); border-radius:var(--adm-radius); padding:1.25rem 1.5rem; margin-bottom:2rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+      <div>
+        <h2 style="font-family:var(--font-heading); font-size:1.15rem; margin:0 0 0.25rem 0; color:var(--adm-text);">Filter Comments</h2>
+        <p style="color:var(--adm-muted); font-size:0.8rem; margin:0;">Filter comment groups by their respective post</p>
+      </div>
+      <div style="min-width: 250px;">
+        <select id="post-filter" class="form-control" style="width:100%;">
+          <option value="">All Posts (<%= comments.length %> comments)</option>
+          <% groupedList.forEach(group => { %>
+            <option value="<%= group.id %>"><%= group.title %> (<%= group.comments.length %>)</option>
+          <% }) %>
+        </select>
+      </div>
+    </div>
+  <% } %>
+
+  <div id="comment-groups-container">
+    <% if (comments.length === 0) { %>
+      <div style="background:var(--adm-surface); border:1px solid var(--adm-border); border-radius:var(--adm-radius); text-align:center; padding:5rem 2rem; color:var(--adm-muted); font-style:italic;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:1.5rem; opacity:0.4; color:var(--adm-muted);">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+        <p style="margin:0; font-size:1.05rem;">No comments have been posted yet on your stories.</p>
+      </div>
+    <% } else { %>
+      <% groupedList.forEach(group => { %>
+        <div class="post-comment-group-card" data-post-id="<%= group.id %>" style="background:var(--adm-surface); border:1px solid var(--adm-border); border-radius:var(--adm-radius); padding:1.5rem; margin-bottom:1.5rem; transition: all 0.2s ease;">
+          <div class="group-header" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--adm-border); padding-bottom:0.75rem; margin-bottom:1.25rem;">
+            <h3 style="margin:0; font-size:1.1rem; font-family:var(--font-heading); color:#fff; display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+              <span><%= group.title %></span>
+              <span style="font-size:0.78rem; color:var(--adm-muted); font-weight:normal; background:rgba(255,255,255,0.06); padding:0.15rem 0.5rem; border-radius:20px;">
+                <%= group.comments.length %> <%= group.comments.length === 1 ? 'comment' : 'comments' %>
+              </span>
+            </h3>
+            <a href="/blog/<%= group.slug %>" class="adm-btn adm-btn-ghost" style="padding:0.35rem 0.75rem; font-size:0.75rem;" target="_blank">View Post ↗</a>
+          </div>
+          <div class="comments-list" style="display:flex; flex-direction:column; gap:0.85rem;">
+            <% group.comments.forEach(comment => { %>
+              <div class="comment-row" style="background: rgba(255,255,255,0.015); border: 1px solid rgba(255,255,255,0.04); border-radius: 6px; padding: 1.15rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 1.25rem;">
+                <div style="flex:1;">
+                  <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem; flex-wrap:wrap;">
+                    <strong style="color:var(--adm-text); font-size:0.92rem;"><%= comment.name %></strong>
+                    <span style="color:var(--adm-muted); font-size:0.78rem;"><%= new Date(comment.created_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) %></span>
+                  </div>
+                  <p style="margin:0; color:rgba(255,255,255,0.85); font-size:0.9rem; line-height:1.5; white-space: pre-wrap;"><%= comment.comment %></p>
+                </div>
+                <form action="/admin/comments/<%= comment.id %>/delete" method="POST" onsubmit="return confirm('Delete this comment permanently?');" style="margin:0;">
+                  <button type="submit" class="adm-btn adm-btn-danger" style="padding: 0.45rem 0.85rem; font-size: 0.78rem; font-weight:500;">Delete</button>
+                </form>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const postFilter = document.getElementById('post-filter');
+    if (postFilter) {
+      postFilter.addEventListener('change', function() {
+        const selectedPostId = this.value;
+        const cards = document.querySelectorAll('.post-comment-group-card');
+        cards.forEach(card => {
+          if (!selectedPostId || card.getAttribute('data-post-id') === selectedPostId) {
+            card.style.display = 'block';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    }
+  });
+</script>

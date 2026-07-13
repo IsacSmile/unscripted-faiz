@@ -23,6 +23,7 @@
   <div class="adm-topbar-right">
     <a href="/admin/new" class="adm-btn adm-btn-primary">+ New Post</a>
     <a href="/admin/categories" class="adm-btn adm-btn-ghost">Categories</a>
+    <a href="/admin/comments" class="adm-btn adm-btn-ghost">Comments</a>
     <a href="/admin/settings" class="adm-btn adm-btn-ghost">Settings</a>
     <a href="/home" class="adm-btn adm-btn-ghost" target="_blank">View Site ↗</a>
     <a href="/admin/logout" class="adm-btn adm-btn-ghost">Logout</a>
@@ -68,6 +69,7 @@
             <th>Title</th>
             <th>Category</th>
             <th>Status</th>
+            <th>Views</th>
             <th>Date</th>
             <th>Actions</th>
           </tr>
@@ -84,6 +86,9 @@
               </td>
               <td>
                 <span class="badge badge-<%= post.status %>"><%= post.status %></span>
+              </td>
+              <td style="color:var(--adm-muted); font-weight: 500;">
+                <%= post.view_count || 0 %>
               </td>
               <td class="date-cell">
                 <% if (post.status === 'scheduled' && post.scheduled_for) { %>

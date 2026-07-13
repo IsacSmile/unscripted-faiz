@@ -620,4 +620,25 @@ router.use((error, req, res, next) => {
   next();
 });
 
+// ─── Comment Moderation ─────────────────────────────────────────
+router.get('/comments', (req, res) => {
+  const comments = db.prepare(`
+    SELECT c.*, p.title as post_title, p.slug as post_slug 
+    FROM comments c
+    JOIN posts p ON c.post_id = p.id
+    ORDER BY c.created_at DESC
+  `).all();
+
+  res.render('admin/comments', {
+    title: 'Comments Moderation',
+    layout: 'admin/layout',
+    comments
+  });
+});
+
+router.post('/comments/:id/delete', (req, res) => {
+  db.prepare('DELETE FROM comments WHERE id = ?').run(req.params.id);
+  res.redirect('/admin/comments');
+});
+
 module.exports = router;

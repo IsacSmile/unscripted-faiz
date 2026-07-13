@@ -10,7 +10,7 @@ router.get('/posts', (req, res) => {
   const category = req.query.category || '';
   const q = req.query.q || '';
 
-  let sql = "SELECT id, title, slug, category, description, cover_image, published_at FROM posts WHERE status = 'published'";
+  let sql = "SELECT id, title, slug, category, description, cover_image, view_count, published_at FROM posts WHERE status = 'published'";
   const params = [];
 
   if (q) {
@@ -36,7 +36,7 @@ router.get('/search', (req, res) => {
   const category = req.query.category || '';
   if (!q && !category) return res.json({ posts: [], total: 0 });
 
-  let sql = "SELECT id, title, slug, category, description, cover_image, published_at FROM posts WHERE status = 'published'";
+  let sql = "SELECT id, title, slug, category, description, cover_image, view_count, published_at FROM posts WHERE status = 'published'";
   const params = [];
 
   if (q) {

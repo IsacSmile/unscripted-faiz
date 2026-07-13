@@ -46,6 +46,7 @@ db.exec(`
     scheduled_for DATETIME,
     featured INTEGER DEFAULT 0,
     written_by TEXT,
+    view_count INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     published_at DATETIME
@@ -65,6 +66,12 @@ db.exec(`
     value TEXT NOT NULL
   );
 `);
+
+try {
+  db.exec('ALTER TABLE posts ADD COLUMN view_count INTEGER DEFAULT 0;');
+} catch (e) {
+  // Column already exists
+}
 
 // ======================================================
 // Default Settings
