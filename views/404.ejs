@@ -1,5 +1,141 @@
-<div class="container error-page">
-  <h1>404</h1>
-  <p>The page you're looking for doesn't exist or has drifted away.</p>
-  <a href="/home" class="btn btn-primary">Go Home</a>
+<div class="error-page-wrapper">
+  <div class="error-card-modern">
+    <div class="glow-orb-container">
+      <div class="glow-orb"></div>
+    </div>
+    <span class="error-badge">404 Error</span>
+    <h1 class="error-number">404</h1>
+    <h2 class="error-subtitle">Page Not Found</h2>
+    <p class="error-message">The page you are looking for has drifted away or doesn't exist.</p>
+    <a href="/home" class="error-home-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+      Go back home
+    </a>
+  </div>
 </div>
+
+<style>
+  .error-page-wrapper {
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 1rem;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .error-card-modern {
+    max-width: 520px;
+    width: 100%;
+    background: rgba(30, 41, 59, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 24px;
+    padding: 3.5rem 2.5rem;
+    text-align: center;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(16px);
+    position: relative;
+    z-index: 2;
+    overflow: hidden;
+  }
+  
+  /* Ambient glow effect */
+  .glow-orb-container {
+    position: absolute;
+    top: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 180px;
+    height: 180px;
+    pointer-events: none;
+    z-index: -1;
+    filter: blur(50px);
+    opacity: 0.35;
+  }
+  
+  .glow-orb {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--accent-color, #c4a882) 0%, transparent 70%);
+    animation: pulseOrb 4s ease-in-out infinite alternate;
+  }
+  
+  @keyframes pulseOrb {
+    0% { transform: scale(0.9); opacity: 0.7; }
+    100% { transform: scale(1.1); opacity: 1; }
+  }
+  
+  .error-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 600;
+    color: var(--accent-color, #c4a882);
+    margin-bottom: 1.5rem;
+    padding: 0.35rem 1rem;
+    background: rgba(196, 168, 130, 0.1);
+    border: 1px solid rgba(196, 168, 130, 0.15);
+    border-radius: 50px;
+  }
+  
+  .error-number {
+    font-family: var(--font-heading, 'Fraunces', serif);
+    font-size: 6.5rem;
+    font-weight: 800;
+    line-height: 1;
+    margin: 0 0 0.5rem 0;
+    background: linear-gradient(135deg, var(--accent-color, #c4a882) 0%, #ffffff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -3px;
+  }
+  
+  .error-subtitle {
+    font-family: var(--font-heading, 'Fraunces', serif);
+    font-size: 1.85rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    color: var(--text-color, #f1f5f9);
+  }
+  
+  .error-message {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--muted-color, #94a3b8);
+    opacity: 0.85;
+    margin-bottom: 2.5rem;
+    padding: 0 1rem;
+  }
+  
+  .error-home-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    background-color: var(--accent-color, #c4a882);
+    color: var(--bg-color, #0c0f1a);
+    padding: 0.85rem 2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--accent-color, #c4a882);
+    box-shadow: 0 10px 20px rgba(196, 168, 130, 0.15);
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  
+  .error-home-btn:hover {
+    background-color: transparent;
+    color: var(--accent-color, #c4a882);
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px rgba(196, 168, 130, 0.25);
+  }
+  
+  .error-home-btn svg {
+    pointer-events: none;
+  }
+</style>
