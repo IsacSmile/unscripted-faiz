@@ -1,4 +1,4 @@
-# UnscriptedFaiz 🖋️
+# UnscriptedFaiz || Unfiltered Faiz
 
 A full-stack, lightweight, and premium personal blog web application built with **Node.js, Express, SQLite, and EJS**. 
 
@@ -25,7 +25,7 @@ Designed with a focus on editorial minimalism, typography (featuring Fraunces, L
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Backend:** Node.js, Express, Multer (file uploads), express-session
 - **Database:** SQLite (`better-sqlite3` wrapper)
@@ -35,7 +35,7 @@ Designed with a focus on editorial minimalism, typography (featuring Fraunces, L
 
 ---
 
-## 🚀 Setup Instructions
+## Setup Instructions
 
 ### 1. Clone & Install Dependencies
 Clone the repository to your local machine and install packages:
