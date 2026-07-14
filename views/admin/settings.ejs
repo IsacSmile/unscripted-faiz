@@ -39,21 +39,7 @@
       </div>
     </div>
 
-    <!-- Row 2: Quran Verse Settings -->
-    <div style="background:var(--adm-surface); border:1px solid var(--adm-border); border-radius:var(--adm-radius); padding:2rem; margin-bottom:2rem;">
-      <h2 style="font-family:var(--font-heading); font-size:1.20rem; margin-bottom:0.5rem; color:var(--adm-text);">Footer Quran Verse</h2>
-      <p style="color:var(--adm-muted); font-size:0.85rem; margin-bottom:2rem;">Update the Quranic verse displayed at the center of the site-wide footer.</p>
-      
-      <div class="form-group">
-        <label>Quran Verse Text</label>
-        <textarea name="quran_verse" class="form-control" rows="3" required><%= settings.quran_verse || 'And whoever relies upon Allah — then He is sufficient for him.' %></textarea>
-      </div>
-      <div class="form-group">
-        <label>Verse Reference / Citation</label>
-        <input type="text" name="quran_ref" class="form-control"
-               value="<%= settings.quran_ref || '— Quran 65:3' %>" required>
-      </div>
-    </div>
+
 
     <!-- Row 3: Hero Ambient Music Settings -->
     <div style="background:var(--adm-surface); border:1px solid var(--adm-border); border-radius:var(--adm-radius); padding:2rem; margin-bottom:2rem;">
@@ -117,4 +103,52 @@
 
     <button type="submit" class="adm-btn adm-btn-primary" style="width: 100%; padding: 0.85rem; font-size: 1rem;">Save All Settings</button>
   </form>
+
+  <!-- Quran Verses Rotation (Outside the main settings form to avoid nested forms) -->
+  <div id="quran-verses-section" style="background:var(--adm-surface); border:1px solid var(--adm-border); border-radius:var(--adm-radius); padding:2rem; margin-bottom:2rem; margin-top:2rem;">
+    <h2 style="font-family:var(--font-heading); font-size:1.20rem; margin-bottom:0.5rem; color:var(--adm-text);">Footer Quran Verse Pool (Rotating)</h2>
+    <p style="color:var(--adm-muted); font-size:0.85rem; margin-bottom:2rem;">
+      Manage the pool of Quran verses displayed in the footer. One verse is selected randomly on every refresh. If you leave the translation text blank, the system will automatically fetch it from the public Quran API (alquran.cloud) on the next page load.
+    </p>
+
+    <!-- Verses List -->
+    <div class="verses-list" style="display:flex; flex-direction:column; gap:1.5rem; margin-bottom:2.5rem;">
+      <% verses.forEach((v, index) => { %>
+        <div style="background:rgba(255,255,255,0.01); border:1px solid var(--adm-border); border-radius:var(--adm-radius); padding:1.25rem;">
+          <form action="/admin/settings/verses/<%= v.id %>/update" method="POST" style="display:flex; flex-direction:column; gap:0.75rem; margin:0;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <span style="font-weight:600; color:var(--adm-muted); font-size:0.85rem;">#<%= index + 1 %> Reference:</span>
+                <input type="text" name="reference" value="<%= v.reference %>" required class="form-control" style="width:100px; display:inline-block; font-weight:600; height:32px; padding:0.25rem 0.5rem;">
+              </div>
+              <div style="display:flex; gap:0.5rem;">
+                <button type="submit" name="action" value="save" class="adm-btn adm-btn-primary" style="padding:0.35rem 0.75rem; font-size:0.75rem; height:32px;">Save</button>
+                <button type="submit" name="action" value="delete" class="adm-btn" style="padding:0.35rem 0.75rem; font-size:0.75rem; height:32px; background:#dc3545; color:white; border-color:#dc3545;" onclick="return confirm('Are you sure you want to delete this verse?')">Delete</button>
+              </div>
+            </div>
+            <div>
+              <label style="display:block; margin-bottom:0.25rem; font-size:0.8rem; color:var(--adm-muted);">Translation Text:</label>
+              <textarea name="text" rows="2" class="form-control" style="font-size:0.85rem; padding:0.5rem;" placeholder="Optional. Leave blank to auto-fetch translation from Quran API..."><%= v.text || '' %></textarea>
+            </div>
+            <div style="font-size:0.75rem; color:var(--adm-muted); font-style:italic;">
+              <%= v.text ? `Status: Cached translation ("${v.surah_name || 'Quran'} ${v.reference}")` : 'Status: Pending API fetch on next visitor load.' %>
+            </div>
+          </form>
+        </div>
+      <% }) %>
+    </div>
+
+    <!-- Form to add new reference -->
+    <form action="/admin/settings/verses/add" method="POST" style="background:rgba(255, 255, 255, 0.02); border:1px solid var(--adm-border); border-radius:var(--adm-radius); padding:1.25rem; margin:0;">
+      <h3 style="font-family:var(--font-heading); font-size:1.05rem; margin-bottom:0.5rem; color:var(--adm-text);">Add New Verse Reference</h3>
+      <p style="color:var(--adm-muted); font-size:0.8rem; margin-bottom:1rem;">Enter a Surah:Ayah pair (e.g. 94:6, 2:153 or 103:3). The system will fetch the text automatically from the Quran API.</p>
+      
+      <div style="display:flex; gap:0.75rem; align-items:flex-end; flex-wrap:wrap;">
+        <div style="flex:1; min-width:160px;">
+          <input type="text" name="reference" placeholder="e.g. 2:286" required class="form-control" style="height:38px;">
+        </div>
+        <button type="submit" class="adm-btn adm-btn-primary" style="height:38px; padding:0 1.25rem;">Add Reference</button>
+      </div>
+    </form>
+  </div>
 </div>

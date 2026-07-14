@@ -526,10 +526,13 @@ router.get('/settings', (req, res) => {
     settings[row.key] = row.value;
   });
 
+  const verses = db.prepare('SELECT * FROM quran_verses').all();
+
   res.render('admin/settings', {
     title: 'Settings',
     layout: 'admin/layout',
-    settings
+    settings,
+    verses
   });
 });
 
@@ -595,6 +598,48 @@ router.post(
     res.redirect('/admin/settings');
   }
 );
+
+router.post('/settings/verses/add', (req, res) => {
+  const { reference } = req.body;
+  if (reference && reference.trim()) {
+    const ref = reference.trim();
+    const refPattern = /^\d+:\d+(-\d+)?$/;
+    if (refPattern.test(ref)) {
+      try {
+        db.prepare('INSERT INTO quran_verses (reference) VALUES (?)').run(ref);
+      } catch (err) {
+        console.error('Failed to add verse reference:', err.message);
+      }
+    }
+  }
+  res.redirect('/admin/settings#quran-verses-section');
+});
+
+router.post('/settings/verses/:id/update', (req, res) => {
+  const { action, reference, text } = req.body;
+  const id = req.params.id;
+
+  if (action === 'delete') {
+    db.prepare('DELETE FROM quran_verses WHERE id = ?').run(id);
+  } else {
+    const ref = reference ? reference.trim() : '';
+    const txt = text ? text.trim() : null;
+    const refPattern = /^\d+:\d+(-\d+)?$/;
+    
+    if (ref && refPattern.test(ref)) {
+      try {
+        if (txt === '') {
+          db.prepare('UPDATE quran_verses SET reference = ?, text = NULL, surah_name = NULL, ayah_number = NULL WHERE id = ?').run(ref, id);
+        } else {
+          db.prepare('UPDATE quran_verses SET reference = ?, text = ? WHERE id = ?').run(ref, txt, id);
+        }
+      } catch (err) {
+        console.error('Failed to update verse:', err.message);
+      }
+    }
+  }
+  res.redirect('/admin/settings#quran-verses-section');
+});
 
 // ─── Upload error handler ─────────────────────────────────────
 router.use((error, req, res, next) => {

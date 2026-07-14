@@ -9,8 +9,8 @@
 
     <!-- Center: verse -->
     <div class="footer-col footer-col-center">
-      <p class="footer-quote">"<%= settings.quran_verse || 'And whoever relies upon Allah — then He is sufficient for him.' %>"</p>
-      <span class="footer-ref"><%= settings.quran_ref || '— Quran 65:3' %></span>
+      <p class="footer-quote">"<%= typeof quran_verse !== 'undefined' ? quran_verse : (settings.quran_verse || 'And whoever relies upon Allah — then He is sufficient for him.') %>"</p>
+      <span class="footer-ref"><%= typeof quran_ref !== 'undefined' ? quran_ref : (settings.quran_ref || '— Quran At-Talaq 65:3') %></span>
     </div>
 
     <!-- Right: socials -->

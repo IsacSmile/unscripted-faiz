@@ -7,6 +7,7 @@ const fs = require('fs');
 const cron = require('node-cron');
 const expressLayouts = require('express-ejs-layouts');
 const db = require('./db/database');
+const { getRandomVerse } = require('./services/quranService');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -57,7 +58,7 @@ app.use(session({
 // Global variables for all views
 // ======================================================
 
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
   res.locals.path = req.path;
   res.locals.admin = req.session.admin || false;
 
@@ -74,10 +75,17 @@ app.use((req, res, next) => {
     });
 
     res.locals.settings = settings;
+
+    // Get dynamic rotating Quran verse
+    const verse = await getRandomVerse();
+    res.locals.quran_verse = verse.text;
+    res.locals.quran_ref = verse.ref;
   } catch (err) {
     console.error(err);
     res.locals.categories = [];
     res.locals.settings = {};
+    res.locals.quran_verse = 'And whoever relies upon Allah — then He is sufficient for him.';
+    res.locals.quran_ref = '— Quran At-Talaq 65:3';
   }
 
   next();
