@@ -6,53 +6,57 @@
   function fmtDate(d) { return new Date(d).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' }); }
 %>
 
-<section class="posts-section" style="padding-top:2.5rem;">
+<section class="posts-section" style="padding-top: 3.5rem;">
   <div class="container">
 
     <!-- Page heading -->
-    <div style="text-align:center;margin-bottom:2rem;">
-      <h1 class="blog-page-heading">Blog</h1>
-      <p style="font-style:italic;opacity:.65;font-size:1rem;">Thoughts on life, tech, college, and gazals that breathe at midnight.</p>
-    </div>
+    <div class="blog-header-hero" style="text-align: center; margin-bottom: 2.5rem; display: flex; flex-direction: column; align-items: center;">
+      <h1 class="blog-page-heading" style="font-family: var(--font-heading); font-size: 3rem; margin-bottom: 0.5rem; color: var(--text-color); font-weight: 700; letter-spacing: -0.5px;">Blog</h1>
+      <p style="font-style: italic; opacity: 0.65; font-size: 1.05rem; font-family: var(--font-script); margin-bottom: 1.25rem; max-width: 600px; line-height: 1.5; margin-left: auto; margin-right: auto;">
+        Thoughts on life, tech, college, and gazals that breathe at midnight.
+      </p>
 
-    <!-- Info strip -->
-    <div class="blog-info-strip">
-      <div class="blog-info-left">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14,2 14,8 20,8"></polyline></svg>
-        <strong id="info-strip-count"><%= totalCount %></strong>
-        <span id="info-strip-text"><%= totalCount === 1 ? 'post' : 'posts' %></span>
-        <% if (categoryFilter) { %>
-          &nbsp;in <span class="post-card-category <%= catClass(categoryFilter) %>" style="margin-bottom:0;"><%= categories.find(c=>c.slug===categoryFilter)?.name||categoryFilter %></span>
-        <% } else { %>
-          &nbsp;published
+      <!-- Refined Post Count Badge / Info -->
+      <div class="blog-count-badge">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--accent-color); opacity: 0.85; margin-top: -1px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14,2 14,8 20,8"></polyline></svg>
+        <span style="opacity: 0.8; display: inline-flex; align-items: center; gap: 0.25rem;">
+          <strong id="info-strip-count" style="font-weight: 600;"><%= totalCount %></strong>
+          <span id="info-strip-text"><%= totalCount === 1 ? 'post' : 'posts' %></span>
+          <% if (categoryFilter) { %>
+            in <span class="post-card-category <%= catClass(categoryFilter) %>" style="margin: 0; font-size: 0.72rem; padding: 0.08rem 0.35rem; font-weight: 600;"><%= categories.find(c=>c.slug===categoryFilter)?.name||categoryFilter %></span>
+          <% } else { %>
+            published
+          <% } %>
+          <% if (query) { %>— matching "<%= query %>"<% } %>
+        </span>
+        <% if (categoryFilter || query) { %>
+          <span style="opacity: 0.25; margin: 0 0.15rem;">|</span>
+          <a href="/blog" class="blog-info-clear" style="color: var(--accent-color); text-decoration: none; display: inline-flex; align-items: center; gap: 0.2rem; font-size: 0.75rem; font-weight: 600; padding: 0.1rem 0.3rem; border-radius: 4px; transition: var(--transition);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            Clear
+          </a>
         <% } %>
-        <% if (query) { %>&nbsp;— matching "<%= query %>"<% } %>
       </div>
-      <% if (categoryFilter || query) { %>
-        <a href="/blog" class="blog-info-clear">
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          Clear
-        </a>
-      <% } %>
     </div>
 
-    <!-- Live search bar (no form submit needed) -->
-    <div class="search-form-premium" style="margin-bottom:2rem;">
-      <div class="search-input-wrap">
-        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+    <!-- Centered Premium Search Bar -->
+    <div class="search-form-premium" style="max-width: 500px; margin: 0 auto 2.5rem auto; width: 100%;">
+      <div class="search-input-wrap" style="position: relative; width: 100%;">
+        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="position: absolute; left: 1.1rem; top: 50%; transform: translateY(-50%); color: var(--accent-color); opacity: 0.7; pointer-events: none;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         <input type="text" id="live-search-input" class="search-input-field"
-               placeholder="Search posts… (live results)" value="<%= query || '' %>">
+               placeholder="Search whispers & verses…" value="<%= query || '' %>">
         <% if (categoryFilter) { %><input type="hidden" id="cat-filter-val" value="<%= categoryFilter %>"><% } %>
       </div>
     </div>
 
     <!-- Category Tab Row -->
-    <div class="category-scroll-container" style="margin-bottom:2.5rem;">
-      <div class="category-grid" id="category-tabs" style="height:auto;gap:0.75rem;">
-        <a href="/blog<%= query ? '?q='+query : '' %>" class="category-tab <%= !categoryFilter ? 'active' : '' %>">All</a>
+    <div class="category-scroll-container" style="margin-bottom: 2.5rem;">
+      <div class="category-grid" id="category-tabs" style="height: auto; gap: 0.75rem; justify-content: center;">
+        <a href="/blog<%= query ? '?q='+query : '' %>" class="category-tab <%= !categoryFilter ? 'active' : '' %>" style="border-radius: 50px; padding: 0.45rem 1.1rem; font-size: 0.88rem;">All</a>
         <% categories.forEach(cat => { %>
           <a href="/blog?category=<%= cat.slug %><%= query ? '&q='+query : '' %>"
-             class="category-tab <%= catClass(cat.slug) %> <%= categoryFilter===cat.slug ? 'active' : '' %>">
+             class="category-tab <%= catClass(cat.slug) %> <%= categoryFilter===cat.slug ? 'active' : '' %>"
+             style="border-radius: 50px; padding: 0.45rem 1.1rem; font-size: 0.88rem;">
             <%= cat.name %>
           </a>
         <% }) %>
