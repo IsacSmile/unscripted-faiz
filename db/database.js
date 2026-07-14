@@ -79,8 +79,12 @@ const countVerses = db.prepare('SELECT COUNT(*) AS count FROM quran_verses').get
 if (countVerses.count === 0) {
   const insertVerse = db.prepare('INSERT INTO quran_verses (reference, text, surah_name, ayah_number) VALUES (?, ?, ?, ?)');
   insertVerse.run('65:3', 'And whoever relies upon Allah — then He is sufficient for him.', 'At-Talaq', 3);
-  insertVerse.run('2:153', 'O you who have believed, seek help through patience and prayer. Indeed, Allah is with the patient.', 'Al-Baqarah', 153);
-  insertVerse.run('94:6', 'Indeed, with hardship [will be] ease.', 'Ash-Sharh', 6);
+  insertVerse.run('94:5', null, null, null);
+  insertVerse.run('94:6', null, null, null);
+  insertVerse.run('2:152', null, null, null);
+  insertVerse.run('112:1', null, null, null);
+  insertVerse.run('112:3', null, null, null);
+  insertVerse.run('94:8', null, null, null);
 }
 
 try {
