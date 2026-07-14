@@ -59,14 +59,44 @@
 </article>
 
 <!-- COMMENTS SECTION -->
-<div class="comments-section">
+<div class="comments-section" id="comments">
   <h3>Let Your Heart Speak</h3>
 
-  <form action="/blog/<%= post.slug %>/comment" method="POST" class="comment-form">
+  <form action="/blog/<%= post.slug %>/comment" method="POST" class="comment-form" id="comment-form">
+    <% if (typeof error !== 'undefined' && error === 'captcha') { %>
+      <div style="color:#e05a5a; font-size:0.85rem; margin-bottom:1rem; display:flex; align-items:center; gap:0.35rem;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        Incorrect security code. Please try again.
+      </div>
+    <% } %>
+
     <input type="text" name="name" placeholder="Whisper your name…" required>
     <textarea name="comment" placeholder="Let your thoughts flow like verse…" required></textarea>
+
+    <% if (!captchaSolved) { %>
+      <div class="captcha-wrapper" style="display:flex; align-items:center; flex-wrap:wrap; gap:0.75rem; margin-bottom:1.5rem; width:100%;">
+        <div style="height:42px; background:rgba(0,0,0,0.03); border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:0 0.5rem; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+          <img id="captcha-img" src="/api/captcha" alt="CAPTCHA" style="height:100%; width:auto; display:block; filter: var(--captcha-filter, none);">
+        </div>
+        <button type="button" onclick="refreshCaptcha()" style="background:transparent; border:none; color:var(--accent-color); cursor:pointer; font-size:0.85rem; padding:0; display:inline-flex; align-items:center; gap:0.25rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+          Refresh
+        </button>
+        <input type="text" name="captcha" placeholder="Enter security code…" required style="max-width:180px; margin-bottom:0 !important; height:42px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:transparent; color:var(--text-color);">
+      </div>
+    <% } %>
+
     <button type="submit" class="btn btn-primary">Share Your Verse</button>
   </form>
+
+  <script>
+    function refreshCaptcha() {
+      const img = document.getElementById('captcha-img');
+      if (img) {
+        img.src = '/api/captcha?t=' + Date.now();
+      }
+    }
+  </script>
 
   <% if (comments && comments.length > 0) { %>
     <div class="comment-list">

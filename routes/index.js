@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db/database');
 const { format } = require('date-fns');
+const svgCaptcha = require('svg-captcha');
 
 // Helper to get featured posts
 const getFeatured = () => {
@@ -109,7 +110,9 @@ router.get('/blog/:slug', (req, res) => {
     title: `${post.title} - UnfilteredFaiz`,
     post,
     comments,
-    format
+    format,
+    error: req.query.error,
+    captchaSolved: req.session.captchaSolved || false
   });
 });
 
@@ -117,7 +120,16 @@ router.post('/blog/:slug/comment', (req, res) => {
   const post = db.prepare("SELECT id FROM posts WHERE slug = ?").get(req.params.slug);
   if (!post) return res.status(404).send('Not found');
   
-  const { name, comment } = req.body;
+  const { name, comment, captcha } = req.body;
+  
+  if (!req.session.captchaSolved) {
+    if (!captcha || !req.session.captcha || captcha.toLowerCase() !== req.session.captcha.toLowerCase()) {
+      return res.redirect(`/blog/${req.params.slug}?error=captcha#comment-form`);
+    }
+    req.session.captchaSolved = true;
+    req.session.captcha = null;
+  }
+  
   if (name && comment) {
     const insert = db.prepare("INSERT INTO comments (post_id, name, comment) VALUES (?, ?, ?)");
     insert.run(post.id, name, comment);
@@ -155,6 +167,19 @@ router.get('/rss.xml', (req, res) => {
 
   res.set('Content-Type', 'text/xml');
   res.send(rss);
+});
+
+// CAPTCHA generator route
+router.get('/api/captcha', (req, res) => {
+  const captcha = svgCaptcha.create({
+    size: 4,
+    noise: 1,
+    color: true,
+    background: 'transparent'
+  });
+  req.session.captcha = captcha.text;
+  res.type('svg');
+  res.status(200).send(captcha.data);
 });
 
 module.exports = router;

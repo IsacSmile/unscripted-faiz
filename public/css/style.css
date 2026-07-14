@@ -37,6 +37,7 @@
   --color-college: #8f7457;
   --color-personal: #7d4f50;
   --color-gazal: #5c4d70;
+  --captcha-filter: none;
 }
 
 [data-theme="dark"] {
@@ -49,6 +50,7 @@
   --skeleton-bg: #1f253d;
   --skeleton-shimmer: linear-gradient(90deg, #1f253d 0px, #2d3659 40px, #1f253d 80px);
   --header-bg: rgba(10, 13, 22, 0.85);
+  --captcha-filter: invert(0.9) hue-rotate(180deg);
 }
 
 * {
