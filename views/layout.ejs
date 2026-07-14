@@ -9,8 +9,8 @@
   <!-- SEO & Open Graph -->
   <meta property="og:title" content="<%= typeof title !== 'undefined' ? title : 'UnfilteredFaiz' %>">
   <meta property="og:description" content="<%= typeof description !== 'undefined' ? description : 'Whispers from Within' %>">
-  <% if (typeof post !== 'undefined' && post && post.cover_image) { %>
-    <meta property="og:image" content="<%= post.cover_image %>">
+  <% if (typeof post !== 'undefined' && post && (post.cover_image || post.category_image)) { %>
+    <meta property="og:image" content="<%= post.cover_image || post.category_image %>">
   <% } %>
   <link rel="canonical" href="http://localhost:3000<%= path %>">
 

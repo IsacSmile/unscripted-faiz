@@ -10,20 +10,20 @@ router.get('/posts', (req, res) => {
   const category = req.query.category || '';
   const q = req.query.q || '';
 
-  let sql = "SELECT id, title, slug, category, description, cover_image, view_count, published_at FROM posts WHERE status = 'published'";
+  let sql = "SELECT p.id, p.title, p.slug, p.category, p.description, p.cover_image, p.view_count, p.published_at, c.background_image AS category_image FROM posts p LEFT JOIN categories c ON p.category = c.slug WHERE p.status = 'published'";
   const params = [];
 
   if (q) {
-    sql += ' AND (title LIKE ? OR description LIKE ?)';
+    sql += ' AND (p.title LIKE ? OR p.description LIKE ?)';
     const lq = `%${q}%`;
     params.push(lq, lq);
   }
   if (category) {
-    sql += ' AND category = ?';
+    sql += ' AND p.category = ?';
     params.push(category);
   }
 
-  sql += ' ORDER BY published_at DESC LIMIT ? OFFSET ?';
+  sql += ' ORDER BY p.published_at DESC LIMIT ? OFFSET ?';
   params.push(limit, offset);
 
   const posts = db.prepare(sql).all(...params);
@@ -36,24 +36,33 @@ router.get('/search', (req, res) => {
   const category = req.query.category || '';
   if (!q && !category) return res.json({ posts: [], total: 0 });
 
-  let sql = "SELECT id, title, slug, category, description, cover_image, view_count, published_at FROM posts WHERE status = 'published'";
+  let sql = "SELECT p.id, p.title, p.slug, p.category, p.description, p.cover_image, p.view_count, p.published_at, c.background_image AS category_image FROM posts p LEFT JOIN categories c ON p.category = c.slug WHERE p.status = 'published'";
   const params = [];
 
   if (q) {
-    sql += ' AND (title LIKE ? OR description LIKE ?)';
+    sql += ' AND (p.title LIKE ? OR p.description LIKE ?)';
     const lq = `%${q}%`;
     params.push(lq, lq);
   }
   if (category) {
-    sql += ' AND category = ?';
+    sql += ' AND p.category = ?';
     params.push(category);
   }
 
   // Count for info strip
-  let countSql = sql.replace('SELECT id, title, slug, category, description, cover_image, published_at', 'SELECT COUNT(*) as count');
-  const total = db.prepare(countSql).get(...params).count;
+  let countSql = "SELECT COUNT(*) as count FROM posts p WHERE p.status = 'published'";
+  const countParams = [];
+  if (q) {
+    countSql += ' AND (p.title LIKE ? OR p.description LIKE ?)';
+    countParams.push(`%${q}%`, `%${q}%`);
+  }
+  if (category) {
+    countSql += ' AND p.category = ?';
+    countParams.push(category);
+  }
+  const total = db.prepare(countSql).get(...countParams).count;
 
-  sql += ' ORDER BY published_at DESC LIMIT 18';
+  sql += ' ORDER BY p.published_at DESC LIMIT 18';
   const posts = db.prepare(sql).all(...params);
   res.json({ posts, total });
 });

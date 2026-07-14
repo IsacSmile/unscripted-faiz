@@ -41,8 +41,8 @@
     </div>
   </div>
 
-  <% if (post.cover_image) { %>
-    <img src="<%= post.cover_image %>" alt="<%= post.title %>" class="single-post-cover"
+  <% if (post.cover_image || post.category_image) { %>
+    <img src="<%= post.cover_image || post.category_image %>" alt="<%= post.title %>" class="single-post-cover"
          onerror="this.style.display='none'">
   <% } %>
 

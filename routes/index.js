@@ -6,7 +6,13 @@ const svgCaptcha = require('svg-captcha');
 
 // Helper to get featured posts
 const getFeatured = () => {
-  return db.prepare("SELECT * FROM posts WHERE status = 'published' AND featured = 1 ORDER BY published_at DESC").all();
+  return db.prepare(`
+    SELECT p.*, c.background_image AS category_image 
+    FROM posts p 
+    LEFT JOIN categories c ON p.category = c.slug 
+    WHERE p.status = 'published' AND p.featured = 1 
+    ORDER BY p.published_at DESC
+  `).all();
 };
 
 // Helper to get categories
@@ -21,7 +27,14 @@ router.get('/', (req, res) => {
 router.get('/home', (req, res) => {
   const featuredPosts = getFeatured();
   const categoriesRaw = getCategories();
-  const latestPosts = db.prepare("SELECT * FROM posts WHERE status = 'published' ORDER BY published_at DESC LIMIT 18").all();
+  const latestPosts = db.prepare(`
+    SELECT p.*, c.background_image AS category_image 
+    FROM posts p 
+    LEFT JOIN categories c ON p.category = c.slug 
+    WHERE p.status = 'published' 
+    ORDER BY p.published_at DESC 
+    LIMIT 18
+  `).all();
 
   // Attach post counts to categories
   const categories = categoriesRaw.map(cat => ({
@@ -44,34 +57,39 @@ router.get('/blog', (req, res) => {
   const categoryFilter = req.query.category || '';
   
   // We don't fetch all posts immediately, we let the client fetch them or we fetch first 18 based on filters
-  let sql = "SELECT * FROM posts WHERE status = 'published'";
+  let sql = `
+    SELECT p.*, c.background_image AS category_image 
+    FROM posts p 
+    LEFT JOIN categories c ON p.category = c.slug 
+    WHERE p.status = 'published'
+  `;
   const params = [];
   
   if (query) {
-    sql += " AND (title LIKE ? OR description LIKE ? OR content LIKE ?)";
+    sql += " AND (p.title LIKE ? OR p.description LIKE ? OR p.content LIKE ?)";
     const likeQuery = `%${query}%`;
     params.push(likeQuery, likeQuery, likeQuery);
   }
   
   if (categoryFilter) {
-    sql += " AND category = ?";
+    sql += " AND p.category = ?";
     params.push(categoryFilter);
   }
   
-  sql += " ORDER BY published_at DESC LIMIT 18";
+  sql += " ORDER BY p.published_at DESC LIMIT 18";
   
   const posts = db.prepare(sql).all(...params);
 
   // Total count (without limit) for info strip
-  let countSql = "SELECT COUNT(*) as count FROM posts WHERE status = 'published'";
+  let countSql = "SELECT COUNT(*) as count FROM posts p WHERE p.status = 'published'";
   const countParams = [];
   if (query) {
-    countSql += " AND (title LIKE ? OR description LIKE ? OR content LIKE ?)";
+    countSql += " AND (p.title LIKE ? OR p.description LIKE ? OR p.content LIKE ?)";
     const lq = `%${query}%`;
     countParams.push(lq, lq, lq);
   }
   if (categoryFilter) {
-    countSql += " AND category = ?";
+    countSql += " AND p.category = ?";
     countParams.push(categoryFilter);
   }
   const totalCount = db.prepare(countSql).get(...countParams).count;
@@ -88,7 +106,12 @@ router.get('/blog', (req, res) => {
 
 
 router.get('/blog/:slug', (req, res) => {
-  const post = db.prepare("SELECT * FROM posts WHERE slug = ? AND status = 'published'").get(req.params.slug);
+  const post = db.prepare(`
+    SELECT p.*, c.background_image AS category_image 
+    FROM posts p 
+    LEFT JOIN categories c ON p.category = c.slug 
+    WHERE p.slug = ? AND p.status = 'published'
+  `).get(req.params.slug);
   
   if (!post) {
     return res.status(404).render('404', { title: 'Post Not Found - UnfilteredFaiz' });
@@ -140,7 +163,14 @@ router.post('/blog/:slug/comment', (req, res) => {
 
 // RSS Feed
 router.get('/rss.xml', (req, res) => {
-  const posts = db.prepare("SELECT * FROM posts WHERE status = 'published' ORDER BY published_at DESC LIMIT 20").all();
+  const posts = db.prepare(`
+    SELECT p.*, c.background_image AS category_image 
+    FROM posts p 
+    LEFT JOIN categories c ON p.category = c.slug 
+    WHERE p.status = 'published' 
+    ORDER BY p.published_at DESC 
+    LIMIT 20
+  `).all();
   
   let rss = `<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0">

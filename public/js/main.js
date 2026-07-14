@@ -174,9 +174,9 @@ document.addEventListener('DOMContentLoaded', () => {
         <article class="post-card">
           <div class="post-card-img-wrapper">
             <a href="/blog/${post.slug}">
-              <img src="${post.cover_image || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=80'}"
+              <img src="${post.cover_image || post.category_image || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=80'}"
                    alt="${post.title}" class="post-card-img" loading="lazy"
-                   onerror="this.src='https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=80'">
+                   onerror="this.src='${post.category_image || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=80'}'">
             </a>
           </div>
           <div class="post-card-content">
@@ -259,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
           article.className = 'post-card';
           article.innerHTML = `
             <div class="post-card-img-wrapper">
-              <a href="/blog/${post.slug}"><img src="${post.cover_image || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=80'}" alt="${post.title}" class="post-card-img" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=80'"></a>
+              <a href="/blog/${post.slug}"><img src="${post.cover_image || post.category_image || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=80'}" alt="${post.title}" class="post-card-img" loading="lazy" onerror="this.src='${post.category_image || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=80'}'"></a>
             </div>
             <div class="post-card-content">
               <span class="post-card-category ${catClass(post.category)}">${post.category}</span>
