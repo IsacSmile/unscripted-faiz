@@ -127,6 +127,56 @@ router.get('/blog/:slug', (req, res) => {
     post.view_count += 1;
   }
   
+  // Query previous and next posts (by publish date & id)
+  const prevPost = db.prepare(`
+    SELECT p.title, p.slug, p.category, p.cover_image, c.background_image AS category_image, p.published_at
+    FROM posts p
+    LEFT JOIN categories c ON p.category = c.slug
+    WHERE p.status = 'published' AND (p.published_at < ? OR (p.published_at = ? AND p.id < ?))
+    ORDER BY p.published_at DESC, p.id DESC
+    LIMIT 1
+  `).get(post.published_at, post.published_at, post.id);
+
+  const nextPost = db.prepare(`
+    SELECT p.title, p.slug, p.category, p.cover_image, c.background_image AS category_image, p.published_at
+    FROM posts p
+    LEFT JOIN categories c ON p.category = c.slug
+    WHERE p.status = 'published' AND (p.published_at > ? OR (p.published_at = ? AND p.id > ?))
+    ORDER BY p.published_at ASC, p.id ASC
+    LIMIT 1
+  `).get(post.published_at, post.published_at, post.id);
+
+  // Query related posts (shared category first, falling back to most recent)
+  let relatedPosts = db.prepare(`
+    SELECT p.title, p.slug, p.category, p.cover_image, c.background_image AS category_image, p.published_at, p.view_count
+    FROM posts p
+    LEFT JOIN categories c ON p.category = c.slug
+    WHERE p.status = 'published' AND p.category = ? AND p.id != ?
+    ORDER BY p.published_at DESC
+    LIMIT 3
+  `).all(post.category, post.id);
+
+  if (relatedPosts.length < 3) {
+    const needed = 3 - relatedPosts.length;
+    const excludedIds = [post.id];
+    relatedPosts.forEach(r => {
+      const found = db.prepare("SELECT id FROM posts WHERE slug = ?").get(r.slug);
+      if (found) excludedIds.push(found.id);
+    });
+    
+    const placeholders = excludedIds.map(() => '?').join(',');
+    const fallbackPosts = db.prepare(`
+      SELECT p.title, p.slug, p.category, p.cover_image, c.background_image AS category_image, p.published_at, p.view_count
+      FROM posts p
+      LEFT JOIN categories c ON p.category = c.slug
+      WHERE p.status = 'published' AND p.id NOT IN (${placeholders})
+      ORDER BY p.published_at DESC
+      LIMIT ?
+    `).all(...excludedIds, needed);
+    
+    relatedPosts = relatedPosts.concat(fallbackPosts);
+  }
+
   const comments = db.prepare("SELECT * FROM comments WHERE post_id = ? ORDER BY created_at DESC").all(post.id);
   
   res.render('post', {
@@ -134,6 +184,9 @@ router.get('/blog/:slug', (req, res) => {
     post,
     comments,
     format,
+    prevPost,
+    nextPost,
+    relatedPosts,
     error: req.query.error,
     captchaSolved: req.session.captchaSolved || false
   });

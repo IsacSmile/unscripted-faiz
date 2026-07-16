@@ -11,106 +11,192 @@
   }
 %>
 
-<!-- NO sticky bar — removed entirely per bug fix -->
+<div class="reading-progress-bar" id="reading-progress"></div>
 
-<article class="single-post-container">
-  <div id="post-hero" class="single-post-hero">
-    <span class="post-card-category <%= catClass(post.category) %>" style="margin-bottom:1rem;"><%= post.category %></span>
-    <h1 class="single-post-title"><%= post.title %></h1>
-    <div class="single-post-meta">
-      <span class="meta-piece">
-        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-        By <%= post.written_by %>
-      </span>
-      <span class="meta-sep">·</span>
-      <span class="meta-piece">
-        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-        <%= format(new Date(post.published_at), 'MMM d, yyyy') %>
-      </span>
-      <span class="meta-sep">·</span>
-      <span class="meta-piece">
-        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-        <%= post.view_count || 0 %> views
-      </span>
-      <span class="meta-sep">·</span>
-      <button class="share-btn share-btn-inline" id="post-share-btn"
-              data-url="/blog/<%= post.slug %>" data-title="<%= post.title %>" aria-label="Share">
-        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-        Share
-      </button>
-    </div>
-  </div>
+<!-- Floating Contents Button (Mobile Only) -->
+<button class="mobile-toc-toggle" id="mobile-toc-toggle" aria-label="Toggle Table of Contents">
+  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="7" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="21" y1="18" x2="7" y2="18"></line></svg>
+  Contents
+</button>
 
-  <% if (post.cover_image || post.category_image) { %>
-    <img src="<%= post.cover_image || post.category_image %>" alt="<%= post.title %>" class="single-post-cover"
-         onerror="this.style.display='none'">
-  <% } %>
-
-  <% if (post.video_url) { %>
-    <div class="video-container" style="margin-bottom:2.5rem;">
-      <iframe width="100%" height="420" src="<%= post.video_url %>" frameborder="0" allowfullscreen
-              style="border-radius:var(--radius-md);border:1px solid var(--border-color);"></iframe>
-    </div>
-  <% } %>
-
-  <div class="single-post-content">
-    <%- post.content %>
-  </div>
-</article>
-
-<!-- COMMENTS SECTION -->
-<div class="comments-section" id="comments">
-  <h3>Let Your Heart Speak</h3>
-
-  <form action="/blog/<%= post.slug %>/comment" method="POST" class="comment-form" id="comment-form">
-    <% if (typeof error !== 'undefined' && error === 'captcha') { %>
-      <div style="color:#e05a5a; font-size:0.85rem; margin-bottom:1rem; display:flex; align-items:center; gap:0.35rem;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-        Incorrect security code. Please try again.
+<div class="post-layout-wrapper">
+  <!-- Sidebar Table of Contents -->
+  <aside class="post-sidebar" id="post-sidebar">
+    <div class="post-toc-container" id="post-toc-container">
+      <div class="toc-header">
+        <h4 class="toc-title">Table of Contents</h4>
+        <button id="mobile-toc-close" class="mobile-toc-close-btn" aria-label="Close Table of Contents">&times;</button>
       </div>
-    <% } %>
+      <nav class="post-toc" id="post-toc">
+        <!-- Will be dynamically populated via JS -->
+      </nav>
+    </div>
+  </aside>
 
-    <input type="text" name="name" placeholder="Whisper your name…" required>
-    <textarea name="comment" placeholder="Let your thoughts flow like verse…" required></textarea>
-
-    <% if (!captchaSolved) { %>
-      <div class="captcha-wrapper" style="display:flex; align-items:center; flex-wrap:wrap; gap:0.75rem; margin-bottom:1.5rem; width:100%;">
-        <div style="height:42px; background:rgba(0,0,0,0.03); border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:0 0.5rem; display:flex; align-items:center; justify-content:center; overflow:hidden;">
-          <img id="captcha-img" src="/api/captcha" alt="CAPTCHA" style="height:100%; width:auto; display:block; filter: var(--captcha-filter, none);">
+  <div class="post-main-content">
+    <article class="single-post-container">
+      <div id="post-hero" class="single-post-hero">
+        <span class="post-card-category <%= catClass(post.category) %>" style="margin-bottom:1rem;"><%= post.category %></span>
+        <h1 class="single-post-title"><%= post.title %></h1>
+        <div class="single-post-meta">
+          <span class="meta-piece">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            By <%= post.written_by %>
+          </span>
+          <span class="meta-sep">·</span>
+          <span class="meta-piece">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <%= format(new Date(post.published_at), 'MMM d, yyyy') %>
+          </span>
+          <span class="meta-sep">·</span>
+          <span class="meta-piece">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <%= post.view_count || 0 %> views
+          </span>
+          <span class="meta-sep">·</span>
+          <button class="share-btn share-btn-inline" id="post-share-btn"
+                  data-url="/blog/<%= post.slug %>" data-title="<%= post.title %>" aria-label="Share">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+            Share
+          </button>
         </div>
-        <button type="button" onclick="refreshCaptcha()" style="background:transparent; border:none; color:var(--accent-color); cursor:pointer; font-size:0.85rem; padding:0; display:inline-flex; align-items:center; gap:0.25rem;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-          Refresh
-        </button>
-        <input type="text" name="captcha" placeholder="Enter security code…" required style="max-width:180px; margin-bottom:0 !important; height:42px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:transparent; color:var(--text-color);">
       </div>
-    <% } %>
 
-    <button type="submit" class="btn btn-primary">Share Your Verse</button>
-  </form>
+      <% if (post.cover_image || post.category_image) { %>
+        <img src="<%= post.cover_image || post.category_image %>" alt="<%= post.title %>" class="single-post-cover"
+             onerror="this.style.display='none'">
+      <% } %>
 
-  <script>
-    function refreshCaptcha() {
-      const img = document.getElementById('captcha-img');
-      if (img) {
-        img.src = '/api/captcha?t=' + Date.now();
-      }
-    }
-  </script>
+      <% if (post.video_url) { %>
+        <div class="video-container" style="margin-bottom:2.5rem;">
+          <iframe width="100%" height="420" src="<%= post.video_url %>" frameborder="0" allowfullscreen
+                  style="border-radius:var(--radius-md);border:1px solid var(--border-color);"></iframe>
+        </div>
+      <% } %>
 
-  <% if (comments && comments.length > 0) { %>
-    <div class="comment-list">
-      <% comments.forEach(comment => { %>
-        <div class="comment-item">
-          <div class="comment-meta">
-            <span class="comment-author"><%= comment.name %></span>
-            <span class="comment-date"><%= format(new Date(comment.created_at), 'MMM d, yyyy') %></span>
+      <div class="single-post-content" id="single-post-content">
+        <%- post.content %>
+      </div>
+    </article>
+
+    <!-- Previous / Next Navigation -->
+    <div class="post-navigation-row">
+      <% if (prevPost) { %>
+        <a href="/blog/<%= prevPost.slug %>" class="post-nav-card prev-nav-card">
+          <div class="post-nav-img-wrapper">
+            <img src="<%= prevPost.cover_image || prevPost.category_image || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=200&q=80' %>" alt="<%= prevPost.title %>">
           </div>
-          <div class="comment-body"><%= comment.comment %></div>
-        </div>
-      <% }) %>
+          <div class="post-nav-content">
+            <span class="post-nav-direction">← Previous Post</span>
+            <span class="post-nav-category-tag"><%= prevPost.category %></span>
+            <h4 class="post-nav-title"><%= prevPost.title %></h4>
+          </div>
+        </a>
+      <% } else { %>
+        <div class="post-nav-card-placeholder"></div>
+      <% } %>
+
+      <% if (nextPost) { %>
+        <a href="/blog/<%= nextPost.slug %>" class="post-nav-card next-nav-card">
+          <div class="post-nav-content text-right">
+            <span class="post-nav-direction">Next Post →</span>
+            <span class="post-nav-category-tag"><%= nextPost.category %></span>
+            <h4 class="post-nav-title"><%= nextPost.title %></h4>
+          </div>
+          <div class="post-nav-img-wrapper">
+            <img src="<%= nextPost.cover_image || nextPost.category_image || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=200&q=80' %>" alt="<%= nextPost.title %>">
+          </div>
+        </a>
+      <% } else { %>
+        <div class="post-nav-card-placeholder"></div>
+      <% } %>
     </div>
-  <% } %>
+
+    <!-- Related Posts Section -->
+    <% if (relatedPosts && relatedPosts.length > 0) { %>
+      <div class="related-posts-section">
+        <h3 class="related-posts-heading">Related Whispers</h3>
+        <div class="related-posts-grid">
+          <% relatedPosts.forEach(rel => { %>
+            <article class="post-card related-post-card visible">
+              <div class="post-card-img-wrapper">
+                <a href="/blog/<%= rel.slug %>">
+                  <img src="<%= rel.cover_image || rel.category_image || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=80' %>" alt="<%= rel.title %>" class="post-card-img" loading="lazy" onerror="this.src='<%= rel.category_image || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=80' %>'">
+                </a>
+              </div>
+              <div class="post-card-content">
+                <span class="post-card-category <%= catClass(rel.category) %>"><%= rel.category %></span>
+                <h4 class="post-card-title"><a href="/blog/<%= rel.slug %>"><%= rel.title %></a></h4>
+                <div class="post-card-footer">
+                  <span class="post-card-date">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:3px; vertical-align:middle;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    <%= fmtDate(rel.published_at) %>
+                  </span>
+                </div>
+              </div>
+            </article>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- COMMENTS SECTION -->
+    <div class="comments-section" id="comments">
+      <h3>Let Your Heart Speak</h3>
+
+      <form action="/blog/<%= post.slug %>/comment" method="POST" class="comment-form" id="comment-form">
+        <% if (typeof error !== 'undefined' && error === 'captcha') { %>
+          <div style="color:#e05a5a; font-size:0.85rem; margin-bottom:1rem; display:flex; align-items:center; gap:0.35rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            Incorrect security code. Please try again.
+          </div>
+        <% } %>
+
+        <input type="text" name="name" placeholder="Whisper your name…" required>
+        
+        <div class="comment-textarea-wrapper">
+          <textarea name="comment" id="comment-textarea" placeholder="Let your thoughts flow like verse…" required maxlength="500"></textarea>
+          <div class="comment-char-counter" id="comment-char-counter">0 / 500</div>
+        </div>
+
+        <% if (!captchaSolved) { %>
+          <div class="captcha-wrapper" style="display:flex; align-items:center; flex-wrap:wrap; gap:0.75rem; margin-bottom:1.5rem; width:100%;">
+            <div style="height:42px; background:rgba(0,0,0,0.03); border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:0 0.5rem; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+              <img id="captcha-img" src="/api/captcha" alt="CAPTCHA" style="height:100%; width:auto; display:block; filter: var(--captcha-filter, none);">
+            </div>
+            <button type="button" onclick="refreshCaptcha()" style="background:transparent; border:none; color:var(--accent-color); cursor:pointer; font-size:0.85rem; padding:0; display:inline-flex; align-items:center; gap:0.25rem;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+              Refresh
+            </button>
+            <input type="text" name="captcha" placeholder="Enter security code…" required style="max-width:180px; margin-bottom:0 !important; height:42px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:transparent; color:var(--text-color);">
+          </div>
+        <% } %>
+
+        <button type="submit" class="btn btn-primary">Share Your Verse</button>
+      </form>
+
+      <script>
+        function refreshCaptcha() {
+          const img = document.getElementById('captcha-img');
+          if (img) {
+            img.src = '/api/captcha?t=' + Date.now();
+          }
+        }
+      </script>
+
+      <% if (comments && comments.length > 0) { %>
+        <div class="comment-list">
+          <% comments.forEach(comment => { %>
+            <div class="comment-item">
+              <div class="comment-meta">
+                <span class="comment-author"><%= comment.name %></span>
+                <span class="comment-date"><%= format(new Date(comment.created_at), 'MMM d, yyyy') %></span>
+              </div>
+              <div class="comment-body"><%= comment.comment %></div>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+  </div>
 </div>
-
-

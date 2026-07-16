@@ -637,4 +637,149 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  /* ── MIDNIGHT MODE CONTINUOUS TIMER ── */
+  function updateMidnightMode() {
+    const hrs = new Date().getHours();
+    const isMidnight = (hrs >= 22 || hrs < 6);
+    const root = document.documentElement;
+    const badge = document.getElementById('midnight-badge');
+    
+    if (isMidnight) {
+      root.setAttribute('data-midnight', 'true');
+      if (badge) badge.style.display = 'inline-flex';
+    } else {
+      root.removeAttribute('data-midnight');
+      if (badge) badge.style.display = 'none';
+    }
+  }
+  updateMidnightMode();
+  setInterval(updateMidnightMode, 60000);
+
+  /* ── READING PROGRESS INDICATOR ── */
+  const progressBar = document.getElementById('reading-progress');
+  if (progressBar) {
+    window.addEventListener('scroll', () => {
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
+      progressBar.style.width = scrolled + '%';
+    }, { passive: true });
+  }
+
+  /* ── STICKY TABLE OF CONTENTS ── */
+  const postContent = document.getElementById('single-post-content');
+  const tocNav = document.getElementById('post-toc');
+  const sidebar = document.getElementById('post-sidebar');
+  const mobileToggle = document.getElementById('mobile-toc-toggle');
+  const mobileClose = document.getElementById('mobile-toc-close');
+  
+  if (postContent && tocNav) {
+    const headings = postContent.querySelectorAll('h2, h3');
+    
+    if (headings.length >= 2) {
+      const ul = document.createElement('ul');
+      headings.forEach((heading, idx) => {
+        if (!heading.id) {
+          heading.id = 'heading-' + idx;
+        }
+        
+        const li = document.createElement('li');
+        li.className = 'toc-depth-' + heading.tagName.toLowerCase();
+        
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+        
+        a.addEventListener('click', (e) => {
+          e.preventDefault();
+          heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          if (sidebar) sidebar.classList.remove('open');
+        });
+        
+        li.appendChild(a);
+        ul.appendChild(li);
+      });
+      tocNav.appendChild(ul);
+      
+      const tocLinks = tocNav.querySelectorAll('a');
+      const observerOptions = {
+        root: null,
+        rootMargin: '0px 0px -60% 0px',
+        threshold: 0
+      };
+      
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            tocLinks.forEach((link) => {
+              if (link.getAttribute('href') === '#' + id) {
+                link.classList.add('active');
+              } else {
+                link.classList.remove('active');
+              }
+            });
+          }
+        });
+      }, observerOptions);
+      
+      headings.forEach((heading) => observer.observe(heading));
+    } else {
+      const tocContainer = document.getElementById('post-toc-container');
+      if (tocContainer) tocContainer.style.display = 'none';
+      if (mobileToggle) mobileToggle.style.display = 'none';
+    }
+    
+    if (mobileToggle && sidebar) {
+      mobileToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        sidebar.classList.add('open');
+      });
+    }
+    if (mobileClose && sidebar) {
+      mobileClose.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+      });
+    }
+    document.addEventListener('click', (e) => {
+      if (sidebar && sidebar.classList.contains('open') && !sidebar.contains(e.target) && e.target !== mobileToggle) {
+        sidebar.classList.remove('open');
+      }
+    });
+  }
+
+  /* ── COMMENTS CHARACTER LIMIT & COUNTER ── */
+  const commentTextarea = document.getElementById('comment-textarea');
+  const charCounter = document.getElementById('comment-char-counter');
+  const commentForm = document.getElementById('comment-form');
+  
+  if (commentTextarea && charCounter) {
+    const maxLength = parseInt(commentTextarea.getAttribute('maxlength') || 500, 10);
+    
+    function updateCharCount() {
+      const len = commentTextarea.value.length;
+      charCounter.textContent = `${len} / ${maxLength}`;
+      
+      if (len >= maxLength) {
+        charCounter.className = 'comment-char-counter at-limit';
+      } else if (len >= maxLength - 50) {
+        charCounter.className = 'comment-char-counter near-limit';
+      } else {
+        charCounter.className = 'comment-char-counter';
+      }
+    }
+    
+    commentTextarea.addEventListener('input', updateCharCount);
+    updateCharCount();
+    
+    if (commentForm) {
+      commentForm.addEventListener('submit', (e) => {
+        if (commentTextarea.value.length > maxLength) {
+          e.preventDefault();
+          alert(`Comment cannot exceed ${maxLength} characters.`);
+        }
+      });
+    }
+  }
+
 });

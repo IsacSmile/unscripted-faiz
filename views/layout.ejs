@@ -27,11 +27,23 @@
       var s = localStorage.getItem('theme');
       if (!s) s = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       document.documentElement.setAttribute('data-theme', s);
+      
+      var hrs = new Date().getHours();
+      if (hrs >= 22 || hrs < 6) {
+        document.documentElement.setAttribute('data-midnight', 'true');
+      }
     })();
   </script>
   <%- style %>
 </head>
 <body>
+  <!-- Ambient Twinkling Stars for Midnight Mode -->
+  <div class="midnight-stars">
+    <div class="star-layer"></div>
+    <div class="star-layer"></div>
+    <div class="star-layer"></div>
+  </div>
+
   <%- include('partials/header') %>
 
   <main class="main-content">
