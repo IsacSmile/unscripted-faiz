@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const newTheme = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
       root.setAttribute('data-theme', newTheme);
       localStorage.setItem('theme', newTheme);
+      if (typeof updateMidnightMode === 'function') {
+        updateMidnightMode();
+      }
     });
   }
 
@@ -128,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* =========================================
-     LIVE SEARCH on /blog
+     LIVE SEARCH & LOAD MORE PAGINATION (UNIFIED)
   ========================================= */
   const searchField = document.getElementById('live-search-input');
   const postGrid = document.getElementById('post-grid');
@@ -137,108 +140,102 @@ document.addEventListener('DOMContentLoaded', () => {
   const noResults = document.getElementById('no-results');
   const loadMoreBtn = document.getElementById('load-more-btn');
 
-  if (searchField && postGrid) {
-    let debounceTimer;
+  let currentPage = 1;
+  let debounceTimer;
 
-    function catClass(slug) {
-      const map = { tech:'category-tag-tech', world:'category-tag-world', college:'category-tag-college', personal:'category-tag-personal', gazal:'category-tag-gazal' };
-      return map[slug] || 'category-tag-default';
-    }
-    function fmtDate(d) {
-      return new Date(d).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
-    }
-    const calSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`;
-    const eyeSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+  function catClass(slug) {
+    const map = { tech:'category-tag-tech', world:'category-tag-world', college:'category-tag-college', personal:'category-tag-personal', gazal:'category-tag-gazal' };
+    return map[slug] || 'category-tag-default';
+  }
 
-    function showSkeletons() {
-      postGrid.innerHTML = Array.from({length: 6}).map(() => `
-        <div class="post-card skeleton-card">
-          <div class="skeleton-img skeleton"></div>
-          <div style="padding:1rem;display:flex;flex-direction:column;gap:.75rem;">
-            <div class="skeleton-text skeleton" style="width:40%;height:.7rem;"></div>
-            <div class="skeleton-text skeleton"></div>
-            <div class="skeleton-text short skeleton"></div>
+  function fmtDate(d) {
+    if (!d) return '';
+    return new Date(d).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+  }
+
+  const calSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`;
+  const eyeSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+
+  function showSkeletons() {
+    postGrid.innerHTML = Array.from({length: 6}).map(() => `
+      <div class="post-card skeleton-card">
+        <div class="skeleton-img skeleton"></div>
+        <div style="padding:1rem;display:flex;flex-direction:column;gap:.75rem;">
+          <div class="skeleton-text skeleton" style="width:40%;height:.7rem;"></div>
+          <div class="skeleton-text skeleton"></div>
+          <div class="skeleton-text short skeleton"></div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function createPostHTML(post) {
+    return `
+      <article class="post-card">
+        <div class="post-card-img-wrapper">
+          <a href="/blog/${post.slug}">
+            <img src="${post.cover_image || post.category_image || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=80'}"
+                 alt="${post.title}" class="post-card-img" loading="lazy"
+                 onerror="this.src='${post.category_image || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=80'}'">
+          </a>
+        </div>
+        <div class="post-card-content">
+          <span class="post-card-category ${catClass(post.category)}">${post.category}</span>
+          <h3 class="post-card-title"><a href="/blog/${post.slug}">${post.title}</a></h3>
+          <p class="post-card-desc">${post.description || ''}</p>
+          <div class="post-card-footer">
+            <div style="display:flex; align-items:center; gap:0.75rem;">
+              <span class="post-card-date" style="display:inline-flex; align-items:center; gap:0.25rem;">${calSvg} ${fmtDate(post.published_at)}</span>
+              <span class="post-card-date" style="display:inline-flex; align-items:center; gap:0.25rem;">${eyeSvg} ${post.view_count || 0}</span>
+            </div>
+            <button class="share-btn" data-url="/blog/${post.slug}" data-title="${post.title}" aria-label="Share">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+            </button>
           </div>
         </div>
-      `).join('');
-    }
+      </article>
+    `;
+  }
 
-    function renderPosts(posts) {
-      if (posts.length === 0) {
+  async function doSearch(q) {
+    currentPage = 1;
+    showSkeletons();
+    if (loadMoreBtn) loadMoreBtn.style.display = 'none';
+    const currentCategory = new URLSearchParams(location.search).get('category') || '';
+    try {
+      const url = `/api/search?q=${encodeURIComponent(q)}&category=${encodeURIComponent(currentCategory)}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (infoStripCount) infoStripCount.textContent = data.total;
+      if (infoStripText) infoStripText.textContent = data.total === 1 ? 'post' : 'posts';
+      
+      if (data.posts.length === 0) {
         postGrid.innerHTML = '';
         if (noResults) noResults.hidden = false;
         return;
       }
       if (noResults) noResults.hidden = true;
-      postGrid.innerHTML = posts.map(post => `
-        <article class="post-card">
-          <div class="post-card-img-wrapper">
-            <a href="/blog/${post.slug}">
-              <img src="${post.cover_image || post.category_image || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=80'}"
-                   alt="${post.title}" class="post-card-img" loading="lazy"
-                   onerror="this.src='${post.category_image || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=80'}'">
-            </a>
-          </div>
-          <div class="post-card-content">
-            <span class="post-card-category ${catClass(post.category)}">${post.category}</span>
-            <h3 class="post-card-title"><a href="/blog/${post.slug}">${post.title}</a></h3>
-            <p class="post-card-desc">${post.description || ''}</p>
-            <div class="post-card-footer">
-              <div style="display:flex; align-items:center; gap:0.75rem;">
-                <span class="post-card-date">${calSvg} ${fmtDate(post.published_at)}</span>
-                <span class="post-card-date">${eyeSvg} ${post.view_count || 0}</span>
-              </div>
-              <button class="share-btn" data-url="/blog/${post.slug}" data-title="${post.title}" aria-label="Share">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-              </button>
-            </div>
-          </div>
-        </article>
-      `).join('');
-      // Run intersection observer
+      postGrid.innerHTML = data.posts.map(createPostHTML).join('');
       observeCards();
-    }
 
-    const currentCategory = new URLSearchParams(location.search).get('category') || '';
-
-    async function doSearch(q) {
-      showSkeletons();
-      if (loadMoreBtn) loadMoreBtn.style.display = 'none';
-      try {
-        const url = `/api/search?q=${encodeURIComponent(q)}&category=${encodeURIComponent(currentCategory)}`;
-        const res = await fetch(url);
-        const data = await res.json();
-        if (infoStripCount) infoStripCount.textContent = data.total;
-        if (infoStripText) infoStripText.textContent = data.total === 1 ? 'post' : 'posts';
-        renderPosts(data.posts);
-        if (data.posts.length >= 18 && loadMoreBtn) loadMoreBtn.style.display = '';
-      } catch (e) {
-        console.error(e);
+      if (data.posts.length >= 18 && loadMoreBtn) {
+        loadMoreBtn.style.display = '';
+        loadMoreBtn.disabled = false;
+        loadMoreBtn.textContent = 'Load More';
       }
+    } catch (e) {
+      console.error(e);
     }
+  }
 
+  if (searchField && postGrid) {
     searchField.addEventListener('input', () => {
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => doSearch(searchField.value.trim()), 280);
     });
   }
 
-  /* =========================================
-     LOAD MORE PAGINATION
-  ========================================= */
-  if (loadMoreBtn && postGrid && !searchField) {
-    let currentPage = 1;
-    const urlParams = new URLSearchParams(window.location.search);
-    const category = urlParams.get('category') || '';
-    const q = urlParams.get('q') || '';
-
-    function catClass(slug) {
-      const map = { tech:'category-tag-tech', world:'category-tag-world', college:'category-tag-college', personal:'category-tag-personal', gazal:'category-tag-gazal' };
-      return map[slug] || 'category-tag-default';
-    }
-    function fmtDate(d) { return new Date(d).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' }); }
-    const calSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`;
-
+  if (loadMoreBtn && postGrid) {
     loadMoreBtn.addEventListener('click', async () => {
       currentPage++;
       const skeletons = Array.from({length: 6}).map(() => {
@@ -250,34 +247,35 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       loadMoreBtn.disabled = true;
       loadMoreBtn.textContent = 'Loading…';
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const category = urlParams.get('category') || '';
+      const q = searchField ? searchField.value.trim() : (urlParams.get('q') || '');
+
       try {
         const res = await fetch(`/api/posts?page=${currentPage}&category=${encodeURIComponent(category)}&q=${encodeURIComponent(q)}`);
         const data = await res.json();
-        skeletons.forEach(s => { s.style.transition = 'opacity .2s'; s.style.opacity = '0'; setTimeout(() => s.remove(), 220); });
-        data.posts.forEach((post, i) => {
-          const article = document.createElement('article');
-          article.className = 'post-card';
-          article.innerHTML = `
-            <div class="post-card-img-wrapper">
-              <a href="/blog/${post.slug}"><img src="${post.cover_image || post.category_image || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=80'}" alt="${post.title}" class="post-card-img" loading="lazy" onerror="this.src='${post.category_image || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=80'}'"></a>
-            </div>
-            <div class="post-card-content">
-              <span class="post-card-category ${catClass(post.category)}">${post.category}</span>
-              <h3 class="post-card-title"><a href="/blog/${post.slug}">${post.title}</a></h3>
-              <p class="post-card-desc">${post.description || ''}</p>
-              <div class="post-card-footer">
-                <div style="display:flex; align-items:center; gap:0.75rem;">
-                  <span class="post-card-date">${calSvg} ${fmtDate(post.published_at)}</span>
-                  <span class="post-card-date">${eyeSvg} ${post.view_count || 0}</span>
-                </div>
-              <button class="share-btn" data-url="/blog/${post.slug}" data-title="${post.title}" aria-label="Share"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg></button>
-              </div>
-            </div>`;
+        
+        skeletons.forEach(s => {
+          s.style.transition = 'opacity .2s';
+          s.style.opacity = '0';
+          setTimeout(() => s.remove(), 220);
+        });
+
+        data.posts.forEach(post => {
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = createPostHTML(post);
+          const article = tempDiv.firstElementChild;
           postGrid.appendChild(article);
           cardObserver.observe(article);
         });
-        if (data.posts.length < 18) loadMoreBtn.style.display = 'none';
-        else { loadMoreBtn.disabled = false; loadMoreBtn.textContent = 'Load More'; }
+
+        if (data.posts.length < 18) {
+          loadMoreBtn.style.display = 'none';
+        } else {
+          loadMoreBtn.disabled = false;
+          loadMoreBtn.textContent = 'Load More';
+        }
       } catch (e) {
         console.error(e);
         skeletons.forEach(s => s.remove());
@@ -444,7 +442,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (audioType === 'youtube' && ytPlayer && typeof ytPlayer.playVideo === 'function') {
         ytPlayer.playVideo();
       } else if (audio) {
-        audio.play().catch(e => console.warn('HTML5 audio play blocked:', e));
+        audio.play().catch(e => {
+          console.warn('HTML5 audio play blocked:', e);
+          setupAutoplayBypass();
+        });
       }
     }
 
@@ -639,9 +640,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ── MIDNIGHT MODE CONTINUOUS TIMER ── */
   function updateMidnightMode() {
-    const hrs = new Date().getHours();
-    const isMidnight = (hrs >= 22 || hrs < 6);
     const root = document.documentElement;
+    const currentTheme = root.getAttribute('data-theme');
+    const hrs = new Date().getHours();
+    const isMidnight = (hrs >= 22 || hrs < 6) && currentTheme === 'dark';
     const badge = document.getElementById('midnight-badge');
     
     if (isMidnight) {
@@ -671,7 +673,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const tocNav = document.getElementById('post-toc');
   const sidebar = document.getElementById('post-sidebar');
   const mobileToggle = document.getElementById('mobile-toc-toggle');
-  const mobileClose = document.getElementById('mobile-toc-close');
+  const mobileTocClose = document.getElementById('mobile-toc-close');
   
   if (postContent && tocNav) {
     const headings = postContent.querySelectorAll('h2, h3');
@@ -725,6 +727,10 @@ document.addEventListener('DOMContentLoaded', () => {
       
       headings.forEach((heading) => observer.observe(heading));
     } else {
+      const layoutWrapper = document.querySelector('.post-layout-wrapper');
+      if (layoutWrapper) {
+        layoutWrapper.classList.add('no-toc');
+      }
       const tocContainer = document.getElementById('post-toc-container');
       if (tocContainer) tocContainer.style.display = 'none';
       if (mobileToggle) mobileToggle.style.display = 'none';
@@ -736,8 +742,8 @@ document.addEventListener('DOMContentLoaded', () => {
         sidebar.classList.add('open');
       });
     }
-    if (mobileClose && sidebar) {
-      mobileClose.addEventListener('click', () => {
+    if (mobileTocClose && sidebar) {
+      mobileTocClose.addEventListener('click', () => {
         sidebar.classList.remove('open');
       });
     }

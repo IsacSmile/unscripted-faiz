@@ -1,7 +1,20 @@
+<%
+  function toLocalDatetimeString(dateVal) {
+    if (!dateVal) return '';
+    const date = new Date(dateVal);
+    const offset = date.getTimezoneOffset();
+    const localDate = new Date(date.getTime() - (offset * 60 * 1000));
+    return localDate.toISOString().slice(0, 16);
+  }
+%>
+<style>
+  .schedule-hidden { display: none; }
+  .schedule-visible { display: block; }
+</style>
 <!-- Top Bar -->
 <div class="adm-topbar">
   <a href="/admin/dashboard" class="adm-wordmark">
-    unfiltereFaiz
+    <span class="wm-un">un</span><span class="wm-f">filtered</span><span class="wm-aiz">Faiz</span>
   </a>
   <span style="color:var(--adm-border); font-size:1.2rem;">|</span>
   <span style="color:var(--adm-muted); font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;">
@@ -55,11 +68,11 @@
             </select>
           </div>
 
-          <div id="schedule-container" style="display:<%= post.status === 'scheduled' ? 'block' : 'none' %>; margin-bottom:0.75rem;">
+          <div id="schedule-container" class="<%= post.status === 'scheduled' ? 'schedule-visible' : 'schedule-hidden' %>" style="margin-bottom:0.75rem;">
             <div class="form-group" style="margin:0;">
               <label>Publish At</label>
               <input type="datetime-local" name="scheduled_for" class="form-control"
-                value="<%= post.scheduled_for ? new Date(post.scheduled_for).toISOString().slice(0,16) : '' %>">
+                value="<%= toLocalDatetimeString(post.scheduled_for) %>">
             </div>
           </div>
 

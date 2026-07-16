@@ -230,6 +230,9 @@ router.post(
     if (status === 'scheduled' && !scheduled_for) {
       status = 'draft';
     }
+    if (status !== 'scheduled') {
+      scheduled_for = null;
+    }
 
     const publishedAt =
       status === 'published'
@@ -340,6 +343,13 @@ router.post(
 
     if (!existingPost) {
       return res.redirect('/admin/dashboard');
+    }
+
+    if (status === 'scheduled' && !scheduled_for) {
+      status = 'draft';
+    }
+    if (status !== 'scheduled') {
+      scheduled_for = null;
     }
 
     const publishedAt =
@@ -628,10 +638,17 @@ router.post('/settings/verses/:id/update', (req, res) => {
     
     if (ref && refPattern.test(ref)) {
       try {
-        if (txt === '') {
-          db.prepare('UPDATE quran_verses SET reference = ?, text = NULL, surah_name = NULL, ayah_number = NULL WHERE id = ?').run(ref, id);
-        } else {
-          db.prepare('UPDATE quran_verses SET reference = ?, text = ? WHERE id = ?').run(ref, txt, id);
+        const existing = db.prepare('SELECT * FROM quran_verses WHERE id = ?').get(id);
+        if (existing) {
+          if (ref !== existing.reference && txt === existing.text) {
+            // Reference changed but text wasn't manually updated: clear cache to force re-fetch
+            db.prepare('UPDATE quran_verses SET reference = ?, text = NULL, surah_name = NULL, ayah_number = NULL WHERE id = ?').run(ref, id);
+          } else if (txt === '' || txt === null) {
+            db.prepare('UPDATE quran_verses SET reference = ?, text = NULL, surah_name = NULL, ayah_number = NULL WHERE id = ?').run(ref, id);
+          } else {
+            // Text was manually updated or reference didn't change
+            db.prepare('UPDATE quran_verses SET reference = ?, text = ? WHERE id = ?').run(ref, txt, id);
+          }
         }
       } catch (err) {
         console.error('Failed to update verse:', err.message);

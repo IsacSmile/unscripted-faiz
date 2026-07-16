@@ -29,7 +29,7 @@
       document.documentElement.setAttribute('data-theme', s);
       
       var hrs = new Date().getHours();
-      if (hrs >= 22 || hrs < 6) {
+      if ((hrs >= 22 || hrs < 6) && s === 'dark') {
         document.documentElement.setAttribute('data-midnight', 'true');
       }
     })();

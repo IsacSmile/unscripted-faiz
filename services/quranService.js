@@ -74,7 +74,7 @@ async function getRandomVerse() {
         if (words >= 5 && words <= 15) {
           return {
             text: chosen.text,
-            ref: `— Quran ${chosen.surah_name} ${chosen.reference}`
+            ref: `— Quran ${chosen.surah_name || 'Quran'} ${chosen.reference}`
           };
         }
         console.log(`[QuranService] Skipping cached reference ${chosen.reference}: word count ${words} is outside 5-15 limit.`);
@@ -112,7 +112,17 @@ async function getRandomVerse() {
       const fallback = validCached[fallbackIndex];
       return {
         text: fallback.text,
-        ref: `— Quran ${fallback.surah_name} ${fallback.reference}`
+        ref: `— Quran ${fallback.surah_name || 'Quran'} ${fallback.reference}`
+      };
+    }
+
+    // 4b. Relaxed fallback: if nothing fits, use ANY cached verse in the DB
+    if (cachedVerses.length > 0) {
+      const fallbackIndex = Math.floor(Math.random() * cachedVerses.length);
+      const fallback = cachedVerses[fallbackIndex];
+      return {
+        text: fallback.text,
+        ref: `— Quran ${fallback.surah_name || 'Quran'} ${fallback.reference}`
       };
     }
 
